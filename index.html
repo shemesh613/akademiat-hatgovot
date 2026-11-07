@@ -128,6 +128,15 @@ body.manual .tile,body.manual .case{border-style:dashed;border-color:var(--gold-
 .clue small{font-size:16px;font-weight:600;line-height:1.3;padding:0 6px}
 .clue.open{background:#fff;color:var(--ink);border:3px solid var(--gold);cursor:default;animation:flip .4s}
 .verdict{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.verdict.v3{grid-template-columns:1fr 1fr .7fr}
+.clue .qq{font-size:14px;font-weight:700;color:var(--mute)}
+.clue.okc{border-color:#7cc49a;background:#eef8f1}
+.clue.flag{border-color:var(--red);background:#fdeeee}
+.rulebar{text-align:center;font-size:17px;font-weight:700;margin-top:12px;color:var(--ink)}
+.rules{background:#fff;border:3px solid var(--soft);border-radius:20px;padding:12px 16px;margin-bottom:14px;font-size:19px;font-weight:700}
+.rules div{display:flex;align-items:center;gap:10px;margin:6px 0}
+.rules div span{background:#2b3550;color:#fff;border-radius:50%;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+.rules p{margin:10px 0 2px;font-size:17px;color:#7a2e2b}
 .verdict button{font-size:24px;font-weight:700;border-radius:20px;padding:16px 10px;cursor:pointer;font-family:inherit;border:3px solid var(--soft);background:#fff;color:var(--ink)}
 .verdict button span{display:block;font-size:46px}
 .verdict button:disabled{opacity:.4;cursor:default}
@@ -137,7 +146,7 @@ body.manual .tile,body.manual .case{border-style:dashed;border-color:var(--gold-
 .vbox h2{margin:0 0 6px;font-size:28px}
 .vbox p{font-size:19px;margin:6px 0}
 .tipbox{background:var(--teal-l);border-radius:16px;padding:10px 14px;font-size:18px;font-weight:600;margin:12px auto 0;max-width:560px}
-@media(max-width:620px){.cases{grid-template-columns:repeat(2,1fr)}.clues{grid-template-columns:1fr}.clue{min-height:80px;flex-direction:row;font-size:34px}.verdict button{font-size:19px}}
+@media(max-width:620px){.cases{grid-template-columns:repeat(2,1fr)}.clues{grid-template-columns:1fr}.clue{min-height:80px;font-size:30px}.verdict button{font-size:17px;padding:12px 6px}.verdict button span{font-size:36px}.rules{font-size:16px}}
 </style>
 </head>
 <body>
@@ -284,29 +293,39 @@ function O(base,ext){ var o={}; for(var k in base) o[k]=base[k]; for(var j in ex
 var DET=[
  { id:0, nm:"הבדיחה של כולם", ic:"🤣", ans:"with", sit:"מישהו סיפר בדיחה, וכולם צוחקים.",
   svg:function(){ return bg()+kid(250,360,ME({face:"happy",l:[-40,-110],r:[40,-110]}))+kid(420,360,O(BLU,{face:"happy",dir:-1}))+kid(560,360,O(RED,{face:"happy",dir:-1,r:[40,-120]}))+T(250,120,40,"😂")+T(420,120,40,"😂")+T(560,120,40,"😂") },
-  clues:[{e:"😄",t:"גם אני צוחק, ונעים לי"},{e:"💬",t:"צוחקים על הבדיחה, לא עליי"},{e:"🤝",t:"כולנו באותו צד"}] },
- { id:1, nm:"נפלתי בהפסקה", ic:"🤕", ans:"at", go:0, sit:"נפלתי, ושני ילדים מצביעים עליי וצוחקים.",
+  q:[[1,"כן. גם אני צוחק"],[1,"כן. אנחנו חברים"],[1,"לא. צוחקים על הבדיחה, לא עליי"]] },
+ { id:1, nm:"נפלתי בהפסקה", ic:"🤕", ans:"at", go:0, sit:"נפלתי. שני ילדים מצביעים עליי וצוחקים.",
   svg:function(){ return bg()+kid(230,360,ME({face:"sad",lean:-28}))+T(200,150,40,"💫")+kid(470,360,O(RED,{face:"happy",dir:-1,r:[90,-140]}))+kid(590,360,O(PUR,{face:"happy",dir:-1,r:[90,-140]}))+T(380,170,40,"👈")+T(470,110,36,"😂")+T(590,110,36,"😂") },
-  clues:[{e:"👉",t:"מצביעים עליי"},{e:"😞",t:"רק הם צוחקים. לי לא נעים"},{e:"🙅",t:"אף אחד לא עוזר לי לקום"}] },
- { id:2, nm:"עצר כשביקשתי", ic:"🛑", ans:"with", sit:"חבר התבדח איתי. אמרתי ״די״ — והוא הפסיק וחייך.",
+  q:[[0,"לא. לי לא נעים"],[0,"לא נראה. הם מצביעים עליי"],[0,"כן. נפלתי, ואני מתבייש"]] },
+ { id:2, nm:"עצר כשביקשתי", ic:"🛑", ans:"with", sit:"חבר התבדח איתי. אמרתי ״די״. הוא הפסיק מיד וחייך.",
   svg:function(){ return bg()+kid(300,360,ME({face:"happy",r:[60,-130]}))+kid(480,360,O(BLU,{face:"happy",dir:-1,l:[-30,-80],r:[30,-80]}))+bubble(220,40,110,"🛑")+bubble(450,40,110,"👍") },
-  clues:[{e:"🛑",t:"אמרתי די — והוא עצר מיד"},{e:"🙂",t:"הפנים שלו חמות וחברותיות"},{e:"😄",t:"גם לי היה כיף"}] },
- { id:3, nm:"לא מפסיק", ic:"🔁", ans:"at", go:3, sit:"אמרתי ״די״, אבל הוא ממשיך וקורא לעוד ילדים לראות.",
+  q:[[1,"כן. היה לי כיף"],[1,"כן! אמרתי די והוא עצר"],[1,"לא"]] },
+ { id:3, nm:"לא מפסיק", ic:"🔁", ans:"at", go:3, sit:"אמרתי ״די״. הוא ממשיך, וקורא לעוד ילדים לראות.",
   svg:function(){ return bg()+kid(260,360,ME({face:"uneasy",r:[60,-130]}))+bubble(180,40,110,"🛑")+kid(450,360,O(RED,{face:"happy",dir:-1,l:[60,-170]}))+T(520,110,40,"📣")+kid(640,360,O(PUR,{face:"surprised",dir:-1,s:.85}))+kid(720,360,O(BLU,{face:"happy",dir:-1,s:.85})) },
-  clues:[{e:"🔁",t:"אמרתי די, והוא ממשיך"},{e:"📣",t:"קורא לעוד ילדים לצפות"},{e:"😣",t:"אני מרגיש קטן ומבויש"}] },
- { id:4, nm:"פרצוף מצחיק", ic:"🤪", ans:"with", sit:"הייתי עצוב. חבר עשה פרצוף מצחיק כדי שאחייך.",
+  q:[[0,"לא. אני לא נהנה"],[0,"לא! אמרתי די והוא ממשיך"],[0,"כן. כולם מסתכלים עליי"]] },
+ { id:4, nm:"פרצוף מצחיק", ic:"🤪", ans:"with", sit:"הייתי עצוב. חבר עשה פרצוף מצחיק, כדי שאחייך.",
   svg:function(){ return bg()+kid(300,360,ME({face:"happy"}))+T(300,120,38,"🙂")+kid(470,360,O(BLU,{face:"surprised",dir:-1,l:[-40,-190],r:[40,-190]}))+bubble(420,30,110,"🤪")+T(385,200,34,"💛") },
-  clues:[{e:"💛",t:"הוא רוצה שארגיש טוב"},{e:"👀",t:"הוא מסתכל עליי בחום"},{e:"😊",t:"אחרי זה נהיה לי יותר טוב"}] },
- { id:5, nm:"לוחשים ומסתכלים", ic:"🤫", ans:"at", go:4, sit:"שני ילדים לוחשים, מסתכלים עליי ומצחקקים.",
+  q:[[1,"כן. חייכתי, נהיה לי טוב"],[1,"כן"],[1,"לא. הוא רוצה שארגיש טוב"]] },
+ { id:5, nm:"לוחשים ומסתכלים", ic:"🤫", ans:"at", go:4, sit:"שני ילדים לוחשים. הם מסתכלים עליי ומצחקקים.",
   svg:function(){ return bg()+kid(220,360,ME({face:"sad"}))+T(220,120,36,"❓")+kid(500,360,O(RED,{face:"happy",dir:-1,l:[20,-170]}))+kid(570,360,O(PUR,{face:"happy",dir:-1,lean:-10}))+T(540,110,44,"🤭")+T(420,170,34,"👀") },
-  clues:[{e:"🤫",t:"לוחשים ומסתירים ממני"},{e:"👀",t:"מסתכלים עליי ואז צוחקים"},{e:"🚪",t:"לא מזמינים אותי להצטרף"}] },
- { id:6, nm:"הבדיחה שלי", ic:"🎤", ans:"with", sit:"אני סיפרתי בדיחה, וכל החברים צחקו.",
+  q:[[0,"לא. אני מרגיש לא בנוח"],[0,"לא יודע. הם מסתירים ממני"],[0,"כן. מסתכלים עליי וצוחקים"]],
+  note:"כשלא בטוחים — מותר לשאול: ״אתם צוחקים עליי?״ או לספר למבוגר." },
+ { id:6, nm:"הבדיחה שלי", ic:"🎤", ans:"with", sit:"אני סיפרתי בדיחה. כל החברים צחקו.",
   svg:function(){ return bg()+kid(260,360,ME({face:"happy",l:[-50,-170],r:[50,-170]}))+bubble(200,30,120,"🎤😄")+kid(450,360,O(BLU,{face:"happy",dir:-1}))+kid(580,360,O(RED,{face:"happy",dir:-1}))+T(450,110,36,"👏")+T(580,110,36,"😂") },
-  clues:[{e:"🎤",t:"אני התחלתי את הצחוק"},{e:"😄",t:"אני צוחק יחד איתם"},{e:"👏",t:"אומרים לי: ״איזה מצחיק אתה!״"}] },
- { id:7, nm:"צוחקים על השם שלי", ic:"🏷️", ans:"at", go:5, sit:"כל יום הוא הופך את השם שלי לשם מצחיק, וכולם צוחקים.",
+  q:[[1,"כן. אני צוחק איתם"],[1,"כן"],[1,"לא. הם צוחקים מהבדיחה שלי"]] },
+ { id:7, nm:"צוחקים על השם שלי", ic:"🏷️", ans:"at", go:5, sit:"כל יום הוא הופך את השם שלי לשם מצחיק. כולם צוחקים.",
   svg:function(){ return bg()+kid(250,360,ME({face:"sad"}))+T(250,110,40,"😔")+kid(460,360,O(RED,{face:"happy",dir:-1}))+bubble(400,40,120,"🏷️😜")+kid(600,360,O(BLU,{face:"happy",dir:-1,s:.9}))+T(600,120,34,"😂")+T(700,90,30,"📅🔁") },
-  clues:[{e:"📅",t:"זה קורה שוב ושוב"},{e:"🏷️",t:"צוחקים על משהו שלי: שם, בגדים, גוף"},{e:"💔",t:"אני לא צוחק. לי כואב"}] }
+  q:[[0,"לא. לי כואב בלב"],[0,"לא. זה קורה כל יום"],[0,"כן. צוחקים על השם שלי"]] },
+ { id:8, nm:"״רק צחקתי!״", ic:"🪑", ans:"at", go:2, sit:"הוא משך לי את הכיסא. נפלתי, וכאב לי. הוא אמר: ״רק צחקתי!״",
+  svg:function(){ return bg()+'<rect x="330" y="290" width="70" height="10" rx="4" fill="#9a7a5a"/><rect x="335" y="300" width="8" height="60" fill="#9a7a5a"/><rect x="387" y="300" width="8" height="60" fill="#9a7a5a"/>'+kid(220,360,ME({face:"sad",lean:-30}))+T(190,150,40,"🤕")+kid(500,360,O(RED,{face:"happy",dir:-1,r:[70,-120]}))+bubble(450,30,150,"😂 רק צחקתי",30) },
+  q:[[0,"לא. כאב לי"],[0,"הוא לא שאל אותי בכלל"],[0,"כן! כואב לי בגוף"]],
+  note:"גם אם אומרים ״רק צחקתי״ — אם כואב לי, זה לא בסדר. הולכים למבוגר." },
+ { id:9, nm:"״תעשה, יהיה מצחיק!״", ic:"🎭", ans:"at", go:3, sit:"ילדים אמרו לי: ״תגיד למורה מילה גסה, יהיה מצחיק!״ הם מחכים שאסתבך.",
+  svg:function(){ return bg()+kid(250,360,ME({face:"uneasy"}))+T(250,110,40,"😕")+kid(460,360,O(RED,{face:"happy",dir:-1,r:[80,-130]}))+kid(570,360,O(PUR,{face:"happy",dir:-1}))+bubble(420,30,140,"🤫👨‍🏫",36)+T(570,120,34,"🤭") },
+  q:[[0,"לא. אני מרגיש מבולבל"],[0,"לא. הם לוחצים עליי"],[0,"כן. אני אסתבך, והם יצחקו"]],
+  note:"חבר אמיתי לא מבקש ממך לעשות דבר שיסבך אותך. מותר להגיד: ״לא, תודה.״" }
 ];
+var QS=[{e:"😄",t:"גם אני צוחק ונהנה?"},{e:"🛑",t:"אם אגיד ״די״ — יעצרו?"},{e:"🎯",t:"כואב לי, או מבייש אותי?"}];
 function detSolved(){ return DET.filter(function(c){return G.det[c.id]}).length }
 var manual=false;
 function logPush(e){ e.t=Date.now(); G.log.push(e); G.log=G.log.slice(-40); save() }
@@ -385,7 +404,9 @@ function detHome(){
   var cs=DET.map(function(c){ return '<button class="case'+(G.det[c.id]?' solved':'')+'" data-id="'+c.id+'"><div class="ic">'+c.ic+'</div><div class="nm">תיק '+(c.id+1)+'<br>'+c.nm+'</div></button>' }).join("");
   var nxt=DET.filter(function(c){return !G.det[c.id]})[0];
   $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button><button class="tbtn mk'+(manual?' active':'')+'" id="bMark" title="סימון ידני" aria-label="סימון ידני">✏️</button>')+manualBar()+
-    '<h1>🕵️ שלב הבלש</h1><p class="sub">צוחקים <b>איתי</b> או <b>עליי</b>? פותחים רמזים, חושבים — ומחליטים.</p><div class="cases">'+cs+'</div>'+
+    '<h1>🕵️ שלב הבלש</h1><p class="sub">צוחקים <b>איתי</b> או <b>עליי</b>? בכל תיק שואלים את אותן 3 שאלות:</p>'+
+    '<div class="rules">'+QS.map(function(k,i){ return '<div><span>'+(i+1)+'</span>'+k.e+' '+k.t+'</div>' }).join("")+'<p>🚩 אפילו דגל אדום אחד = צוחקים עליי.<br>🤕 כואב בגוף = תמיד לא בסדר, גם אם אומרים ״רק צחקתי״.</p></div>'+
+    '<div class="cases">'+cs+'</div>'+
     '<div class="cta" style="justify-content:center"><button class="big gold" id="bNext">'+(nxt?'🔍 לתיק הבא':'🔀 תיק אקראי')+'</button></div>'+
     '<div class="tipbox" style="text-align:center">💡 לא בטוח? מותר לשאול: ״אתם צוחקים איתי או עליי?״<br>ואם לי לא נעים — זה כבר לא צחוק משותף.</div>';
   bindTop(); bindMark(detHome); $("bHome").onclick=home;
@@ -399,25 +420,32 @@ function detCase(id){
   stopAll(); var c=DET[id], open=0, tries=0, done=false;
   $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button><button class="tbtn" id="bBack">🗂️ תיקים</button>')+
     '<div class="scene"><svg id="stage" viewBox="0 0 800 420" role="img" aria-label="'+c.nm+'">'+c.svg()+'</svg><div id="thought"></div></div>'+
-    '<div class="sit">תיק '+(c.id+1)+': '+c.sit+'</div><div class="heard" style="text-align:center" id="dh">🔍 לחץ על הכרטיסים כדי לגלות רמזים</div>'+
-    '<div class="clues">'+c.clues.map(function(k,i){ return '<button class="clue" data-i="'+i+'">🔍<small>רמז '+(i+1)+'</small></button>' }).join("")+'</div>'+
-    '<div class="verdict"><button id="vWith" disabled><span>😄</span>צוחקים איתי</button><button id="vAt" disabled><span>😟</span>צוחקים עליי</button></div><div id="vres"></div>';
+    '<div class="sit">תיק '+(c.id+1)+': '+c.sit+'</div><div class="heard" style="text-align:center" id="dh">🔍 שואלים 3 שאלות בלש. לחץ על כל כרטיס.</div>'+
+    '<div class="clues">'+QS.map(function(k,i){ return '<button class="clue" data-i="'+i+'">'+k.e+'<small>'+k.t+'</small></button>' }).join("")+'</div>'+
+    '<div class="rulebar">🚩 אפילו דגל אדום אחד = צוחקים <b>עליי</b> · כל התשובות ✅ = צוחקים <b>איתי</b></div>'+
+    '<div class="verdict v3"><button id="vWith" disabled><span>😄</span>צוחקים איתי</button><button id="vAt" disabled><span>😟</span>צוחקים עליי</button><button id="vNs" disabled><span>🤔</span>לא בטוח</button></div><div id="vres"></div>';
   bindTop(); $("bHome").onclick=home; $("bBack").onclick=detHome;
-  function reveal(b){ var k=c.clues[+b.dataset.i]; if(b.classList.contains("open")) return; b.classList.add("open"); b.innerHTML=k.e+'<small>'+k.t+'</small>'; open++; }
+  function reveal(b){ var i=+b.dataset.i, a=c.q[i]; if(b.classList.contains("open")) return; b.classList.add("open",a[0]?"okc":"flag"); b.innerHTML='<span class="qq">'+QS[i].e+' '+QS[i].t+'</span>'+(a[0]?"✅":"🚩")+'<small>'+a[1]+'</small>'; open++; }
+  function enable(){ $("vWith").disabled=false; $("vAt").disabled=false; $("vNs").disabled=false }
   Array.prototype.forEach.call(document.querySelectorAll(".clue"),function(b){ b.onclick=function(){
     if(b.classList.contains("open")) return; sTap(); reveal(b);
-    if(open>=2){ $("vWith").disabled=false; $("vAt").disabled=false; $("dh").textContent="מה אתה חושב? אפשר לפתוח עוד רמז או להחליט." } } });
+    if(open>=3){ enable(); $("dh").textContent="עכשיו תחליט. ספור את הדגלים האדומים 🚩" } else $("dh").textContent="יופי. עוד "+(3-open)+" "+(3-open===1?"שאלה":"שאלות") } });
+  $("vNs").onclick=function(){
+    if(done) return; sTap();
+    $("vres").innerHTML='<div class="vbox"><h2>🤔 זה בסדר לא להיות בטוח</h2><p>אפשר לשאול: <b>״אתם צוחקים איתי או עליי?״</b></p><p>אפשר גם ללכת למבוגר ולספר מה קרה.</p><p>עכשיו נסה: ספור את הדגלים 🚩 ותחליט.</p></div>';
+  };
   function verdict(pick,btn){
     if(done) return; tries++;
-    if(pick!==c.ans){ sWrong(); btn.classList.add("wrong"); thought("🤔"); $("dh").textContent="בדוק שוב את הרמזים — מה הם אומרים?";
-      Array.prototype.forEach.call(document.querySelectorAll(".clue"),reveal); return }
-    done=true; $("dh").textContent="🕵️ פתרת את התיק!"; $("vWith").disabled=true; $("vAt").disabled=true; Array.prototype.forEach.call(document.querySelectorAll(".clue"),reveal);
+    if(pick!==c.ans){ sWrong(); btn.classList.add("wrong"); thought("🤔"); var fl=c.q.filter(function(a){return !a[0]}).length;
+      $("dh").textContent=fl?("יש כאן "+fl+" דגלים אדומים 🚩. מה זה אומר?"):"אין כאן אף דגל אדום 🚩. מה זה אומר?"; return }
+    done=true; $("dh").textContent="🕵️ פתרת את התיק!"; $("vWith").disabled=true; $("vAt").disabled=true; $("vNs").disabled=true;
     var first=!G.det[c.id], xp=first?(tries===1?8:5):2; G.det[c.id]=(G.det[c.id]||0)+1; G.xp+=xp; logPush({d:c.id,w:tries-1});
     sWin(); burst(14); thought(c.ans==="with"?"😄":"🕵️");
     var chip=$("chip"); if(chip) chip.outerHTML=chipHtml();
     var w=c.ans==="with";
     $("vres").innerHTML='<div class="vbox'+(w?'':' at')+'"><h2>'+(w?'✔ נכון! צוחקים איתי':'✔ נכון! צוחקים עליי')+'</h2>'+
       '<p>'+(w?'צחוק <b>איתי</b> = כולם נהנים, גם אני. ואם אבקש לעצור — עוצרים.':'צחוק <b>עליי</b> = רק להם כיף, ולי לא נעים. מותר לי לעצור את זה ולבקש עזרה.')+'</p>'+
+      (c.note?'<div class="tipbox">'+c.note+'</div>':'')+
       '<div class="gain">+'+xp+' נקודות בלש 🕵️</div>'+
       '<div class="cta" style="justify-content:center">'+(c.go!=null?'<button class="big" id="vGo">🎯 לתרגל איך מגיבים</button>':'')+'<button class="big gold" id="vNext">🔍 תיק הבא</button></div></div>';
     if($("vGo")) $("vGo").onclick=function(){ sTap(); play([c.go],false) };
@@ -463,7 +491,7 @@ function mirror(){
 }
 function teacherHtml(){
   var rows=(G.log||[]).slice(-8).reverse().map(function(l){ var isD=l.d!=null, sc=isD?DET[l.d]:SC[l.id]; var d=new Date(l.t); return '<li>'+(isD?'🕵️ ':'')+(sc?sc.nm:'')+' · '+d.toLocaleDateString("he-IL")+(l.m?(isD?(l.n?' · ✏️ סומן ידנית':' · ✏️ בוטל ידנית'):' · ✏️ סומן ידנית ('+l.n+'★)'):'')+(l.h?' · נשמע: ״'+l.h+'״':'')+(l.w?' · ניסיונות נוספים: '+l.w:'')+'</li>' }).join("");
-  return '<details class="tchr"><summary>למורה: שאלות לסיכום ושימוש בטוח</summary><div><b>שאלות לשיחה אחרי כל מצב:</b><ul><li>מה קרה בפעם האחרונה שזה קרה לך באמת?</li><li>מה הרגשת בגוף ברגע ההוא?</li><li>מה ניסית לעשות, ומה קרה אחר כך?</li><li>למי תפנה בבית הספר, ומה תגיד לו?</li></ul><b>חשוב:</b><ul><li>אם עולה סיפור על פגיעה פיזית או הצקה חוזרת: לתעד, ליידע מחנך או יועצת והורים.</li><li>להבהיר לילד שזו לא אשמתו, ושמבוגרים אחראים לעזור.</li><li>לתרגל גם מצבים אמיתיים מהשבוע, לא רק במשחק.</li><li>זיהוי הקול נשלח לשרת של הדפדפן (Google או Microsoft). מומלץ לעדכן את ההורה.</li></ul><b>תרגולים אחרונים:</b><ul>'+(rows||'<li>עדיין אין</li>')+'</ul></div></details>';
+  return '<details class="tchr"><summary>למורה: שאלות לסיכום ושימוש בטוח</summary><div><b>שאלות לשיחה אחרי כל מצב:</b><ul><li>מה קרה בפעם האחרונה שזה קרה לך באמת?</li><li>מה הרגשת בגוף ברגע ההוא?</li><li>מה ניסית לעשות, ומה קרה אחר כך?</li><li>למי תפנה בבית הספר, ומה תגיד לו?</li></ul><b>חשוב:</b><ul><li>אם עולה סיפור על פגיעה פיזית או הצקה חוזרת: לתעד, ליידע מחנך או יועצת והורים.</li><li>להבהיר לילד שזו לא אשמתו, ושמבוגרים אחראים לעזור.</li><li>לתרגל גם מצבים אמיתיים מהשבוע, לא רק במשחק.</li><li>שלב הבלש בנוי לילד שמתקשה לפרש מצבים חברתיים: אותן 3 שאלות בכל תיק, וכלל קבוע (דגל אדום אחד = עליי). כדאי לחזור על השאלות גם במצבים אמיתיים, באותן מילים בדיוק.</li><li>להדגיש: ״רק צחקתי״ לא הופך פגיעה לבסדר. כאב בגוף = הולכים למבוגר.</li><li>זיהוי הקול נשלח לשרת של הדפדפן (Google או Microsoft). מומלץ לעדכן את ההורה.</li></ul><b>תרגולים אחרונים:</b><ul>'+(rows||'<li>עדיין אין</li>')+'</ul></div></details>';
 }
 function randIds(){ return SC.map(function(s){return s.id}).sort(function(){return Math.random()-.5}).slice(0,3) }
 
