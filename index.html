@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>אקדמיית התגובות</title>
+<style>
+:root{
+  --bg:#f3f6fb; --card:#fff; --ink:#1f2d45; --soft:#e4ebf4; --mute:#556178;
+  --teal:#2a9d8f; --teal-d:#1d776c; --teal-l:#e6f5f3; --gold:#f2c14e; --gold-d:#c99a1f;
+  --blue:#6c8ebf; --warm:#f4a261; --red:#d9534f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(1200px 500px at 50% -120px,#dcebf7 0,var(--bg) 70%);color:var(--ink);font-family:"Segoe UI",Heebo,Arial,sans-serif;user-select:none}
+#app{max-width:940px;margin:0 auto;padding:12px 16px 40px}
+.top{flex-wrap:wrap;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.chip{display:flex;align-items:center;gap:10px;background:var(--card);border:2px solid var(--soft);border-radius:18px;padding:6px 14px 6px 8px;box-shadow:0 3px 12px rgba(31,45,69,.05)}
+.chip svg{width:46px;height:46px;background:var(--teal-l);border-radius:50%}
+.chip b{font-size:17px}
+.chip small{display:block;color:var(--mute);font-size:13px}
+.xpbar{height:9px;background:var(--soft);border-radius:9px;overflow:hidden;width:130px;margin-top:3px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:9px;transition:width .8s}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tbtn{background:var(--card);border:2px solid var(--soft);border-radius:14px;font-size:19px;padding:7px 13px;cursor:pointer;color:var(--ink);font-family:inherit;white-space:nowrap}
+.tbtn.active{border-color:var(--teal);background:var(--teal-l)}
+h1{margin:6px 0 2px;font-size:34px;letter-spacing:-.5px}
+.sub{color:var(--mute);margin:0 0 16px;font-size:17px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tile{background:var(--card);border:2px solid var(--soft);border-radius:22px;padding:18px 10px 14px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 14px rgba(31,45,69,.05);font-family:inherit;color:var(--ink)}
+.tile:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(31,45,69,.1);border-color:var(--teal)}
+.tile .ic{font-size:50px;line-height:1.1}
+.tile .nm{font-weight:700;font-size:18px;margin:8px 0 6px}
+.stars{font-size:22px;letter-spacing:3px;color:#8a6508}
+.stars .off{color:#9aa7b8}
+.cta{display:flex;gap:12px;margin:18px 0 8px;flex-wrap:wrap}
+.big{background:var(--teal-d);color:#fff;border:0;border-radius:18px;font-size:24px;font-weight:700;padding:14px 28px;cursor:pointer;box-shadow:0 5px 0 #155a52;font-family:inherit}
+.big:active{transform:translateY(4px);box-shadow:0 1px 0 var(--teal-d)}
+.big.gold{background:var(--gold);color:#4a3a05;box-shadow:0 5px 0 var(--gold-d)}
+.link{background:none;border:0;color:var(--mute);text-decoration:underline;font-size:16px;cursor:pointer;margin-top:10px;font-family:inherit}
+.scene{position:relative;background:var(--card);border-radius:26px;border:2px solid var(--soft);overflow:hidden;box-shadow:0 8px 26px rgba(31,45,69,.08)}
+.scene svg{display:block;width:100%;height:auto}
+.bob{animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+#thought{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#thought span{font-size:90px;background:rgba(255,255,255,.92);border-radius:40px;padding:6px 26px;box-shadow:0 8px 30px rgba(0,0,0,.15);animation:pop .35s}
+.zone{margin-top:14px;min-height:200px}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.opt{background:var(--card);border:3px solid var(--soft);border-radius:22px;min-height:150px;font-size:54px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--ink);transition:transform .15s,border-color .2s,opacity .3s;font-family:inherit;overflow:hidden;line-height:1.1}
+.opt:hover{transform:translateY(-3px);border-color:var(--teal)}
+.opt small{font-size:18px;font-weight:600;display:none}
+body.words .opt small{display:block}
+.opt.seen{border-color:#b9c6d6;background:#f7f9fc}
+.opt.nudge{animation:glow 2s 2}
+.opt.wrong{opacity:.4;animation:wob .45s}
+.opt.hint{animation:glow 1.1s infinite}
+@keyframes wob{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes glow{50%{box-shadow:0 0 0 10px rgba(42,157,143,.25);border-color:var(--teal)}}
+.say{background:var(--card);border:3px solid var(--teal);border-radius:26px;padding:18px 22px 20px;text-align:center;animation:pop .35s}
+.lbl{font-size:17px;color:var(--teal-d);font-weight:700;margin-bottom:6px}
+.sent{font-size:30px;font-weight:700;line-height:1.35;margin-bottom:14px}
+.mic{width:96px;height:96px;border-radius:50%;border:0;background:var(--teal);color:#fff;font-size:42px;cursor:pointer;box-shadow:0 6px 0 var(--teal-d);position:relative}
+.mic.on{background:var(--red);box-shadow:0 6px 0 #a63733;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.meter{position:relative;height:16px;background:var(--soft);border-radius:10px;overflow:hidden;margin:14px auto 6px;max-width:420px}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#9ad9cf,var(--teal),var(--gold));transition:width .08s}
+.meter u{position:absolute;top:0;bottom:0;inset-inline-start:18%;width:52%;border:2px dashed var(--teal-d);border-radius:10px;background:rgba(42,157,143,.14);text-decoration:none}
+.mlab{font-size:14px;color:var(--teal-d);font-weight:700}
+.heard{min-height:26px;color:var(--mute);font-size:18px}
+.heard.ok{color:var(--teal-d);font-weight:700}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+.reward{text-align:center;animation:pop .4s}
+.rcard{display:inline-block;min-width:260px;max-width:430px;border-radius:24px;padding:20px 22px;background:#fff;border:5px solid #c9d3df;box-shadow:0 10px 30px rgba(31,45,69,.14);animation:flip .8s}
+.rcard.rare{border-color:var(--blue);box-shadow:0 10px 30px rgba(108,142,191,.4)}
+.rcard.gold{border-color:var(--gold);box-shadow:0 0 34px rgba(242,193,78,.7);background:linear-gradient(#fffdf4,#fff6d6)}
+.rcard .rk{font-size:15px;font-weight:700;color:var(--mute);letter-spacing:1px}
+.rcard .ri{font-size:56px}
+.rcard .rs{font-size:22px;font-weight:700;line-height:1.35;margin-top:4px}
+@keyframes flip{from{transform:rotateY(90deg) scale(.8);opacity:0}to{transform:none;opacity:1}}
+.gain{font-size:22px;font-weight:700;margin:14px 0 4px}
+.unl{color:var(--gold-d);font-weight:700;font-size:20px;margin:2px 0 8px}
+.modal{position:fixed;inset:0;background:rgba(31,45,69,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.mbox{background:var(--bg);border-radius:26px;padding:22px;max-width:640px;width:100%;max-height:88vh;overflow:auto;animation:pop .3s}
+.mbox h2{margin:0 0 12px}
+.swatches{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.sw{width:54px;height:54px;border-radius:50%;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer;position:relative}
+.sw.sel{outline:4px solid var(--teal)}
+.sw.lock{opacity:.35;cursor:default}
+.sw.lock::after{content:"🔒";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.mc{background:#fff;border:4px solid #c9d3df;border-radius:18px;padding:12px;text-align:center;font-size:16px;font-weight:600}
+.mc.rare{border-color:var(--blue)} .mc.gold{border-color:var(--gold);background:#fff9e1}
+.mc .ri{font-size:36px}
+.mc.lk{opacity:.4;border-style:dashed}
+.fly{position:fixed;font-size:30px;pointer-events:none;z-index:30;animation:fly 1.4s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(360deg);opacity:0}}
+.dots{display:flex;gap:8px}
+#stage.good .me{animation:cheer .9s ease-out forwards}
+#stage.good .oth{animation:away 1s ease-out forwards}
+#stage.bad .oth{animation:shk .5s}
+@keyframes cheer{30%{transform:translateY(-22px)}60%{transform:translateY(0)}80%{transform:translateY(-8px)}100%{transform:none}}
+@keyframes away{to{transform:translateX(46px)}}
+@keyframes shk{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--soft)}.dot.on{background:var(--gold)}.dot.now{outline:3px solid var(--teal);outline-offset:2px}
+button:focus-visible{outline:3px solid #1d776c;outline-offset:3px}
+.tchr{margin-top:22px;background:var(--card);border:2px solid var(--soft);border-radius:18px;padding:12px 16px;font-size:16px}
+.tchr summary{cursor:pointer;font-weight:700}.tchr ul{margin:6px 0 10px;padding-inline-start:22px}
+body.calm *{animation:none!important;transition:none!important}body.calm .fly{display:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fly{display:none}}
+@media(max-width:480px){.tbtn{padding:7px 10px}.xpbar{width:90px}.chip small{display:none}.opt{min-height:130px;font-size:34px}}
+@media(max-width:620px){.tiles{grid-template-columns:repeat(2,1fr)}.opt{min-height:110px;font-size:40px}.sent{font-size:23px}h1{font-size:27px}}
+/* manual marking */
+.mbar{background:#fff7e0;border:3px dashed var(--gold-d);border-radius:18px;padding:10px 16px;margin-bottom:14px;font-size:17px;font-weight:700;color:#6b5208;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+body.manual .tile,body.manual .case{border-style:dashed;border-color:var(--gold-d)}
+.tbtn.mk.active{border-color:var(--gold-d);background:#fff7e0}
+/* detective */
+.detbtn{width:100%;margin-top:14px;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#2b3550,#3d4a66);color:#fff;border:0;border-radius:22px;padding:16px 20px;cursor:pointer;font-family:inherit;text-align:right;box-shadow:0 5px 0 #1d2438}
+.detbtn .ic{font-size:52px}.detbtn b{font-size:22px;display:block}.detbtn small{font-size:16px;opacity:.85}
+.detbtn .prog{margin-inline-start:auto;font-size:20px;font-weight:700;background:rgba(255,255,255,.15);border-radius:14px;padding:6px 12px;white-space:nowrap}
+.cases{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.case{background:var(--card);border:2px solid var(--soft);border-radius:18px;padding:12px 6px;text-align:center;cursor:pointer;font-family:inherit;color:var(--ink);position:relative}
+.case .ic{font-size:40px}.case .nm{font-weight:700;font-size:15px;margin-top:4px}
+.case.solved{background:#eef8f1;border-color:#7cc49a}
+.case.solved::after{content:"✔";position:absolute;top:6px;inset-inline-start:10px;color:#2e8b57;font-size:20px;font-weight:700}
+.sit{font-size:22px;font-weight:700;text-align:center;margin:12px 0 4px}
+.clues{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+.clue{background:#2b3550;color:#fff;border:0;border-radius:18px;min-height:110px;font-size:40px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.clue small{font-size:16px;font-weight:600;line-height:1.3;padding:0 6px}
+.clue.open{background:#fff;color:var(--ink);border:3px solid var(--gold);cursor:default;animation:flip .4s}
+.verdict{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.verdict button{font-size:24px;font-weight:700;border-radius:20px;padding:16px 10px;cursor:pointer;font-family:inherit;border:3px solid var(--soft);background:#fff;color:var(--ink)}
+.verdict button span{display:block;font-size:46px}
+.verdict button:disabled{opacity:.4;cursor:default}
+.verdict button.wrong{animation:wob .45s;opacity:.5}
+.vbox{background:#fff;border:4px solid var(--teal);border-radius:24px;padding:18px;text-align:center;margin-top:14px;animation:pop .35s}
+.vbox.at{border-color:var(--warm)}
+.vbox h2{margin:0 0 6px;font-size:28px}
+.vbox p{font-size:19px;margin:6px 0}
+.tipbox{background:var(--teal-l);border-radius:16px;padding:10px 14px;font-size:18px;font-weight:600;margin:12px auto 0;max-width:560px}
+@media(max-width:620px){.cases{grid-template-columns:repeat(2,1fr)}.clues{grid-template-columns:1fr}.clue{min-height:80px;flex-direction:row;font-size:34px}.verdict button{font-size:19px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var store={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+           set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- saved progress ---------- */
+var G=store.get("noamV3",{xp:0,done:{},hero:"#2a9d8f",words:true,log:[]});
+if(!G||typeof G!=="object") G={xp:0,done:{},hero:"#2a9d8f",words:true,log:[]};
+G.done=(G.done&&typeof G.done==="object")?G.done:{}; G.det=(G.det&&typeof G.det==="object")?G.det:{}; G.log=Array.isArray(G.log)?G.log:[]; G.xp=+G.xp||0;
+function save(){ store.set("noamV3",G) }
+var RANKS=[{x:0,n:"יוצא לדרך",e:"🌱"},{x:30,n:"מתאמן",e:"🛡️"},{x:80,n:"מנוסה",e:"⚡"},{x:150,n:"מנהיג",e:"🧭"},{x:250,n:"אגדה",e:"👑"}];
+var COLORS=[{c:"#2a9d8f",x:0},{c:"#6c8ebf",x:0},{c:"#e76f51",x:20},{c:"#9b5de5",x:50},{c:"#f2c14e",x:100},{c:"#1f2937",x:180}];
+function rankOf(xp){ var r=0; RANKS.forEach(function(k,i){ if(xp>=k.x) r=i }); return r }
+
+/* ---------- sound (synthesized) ---------- */
+var ac=null,muted=false;
+function ctx(){ if(!ac){ try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){} } return ac }
+function tone(f,t0,d,vol,type){
+  var a=ctx(); if(!a||muted) return;
+  var o=a.createOscillator(),g=a.createGain();
+  o.type=type||"sine"; o.frequency.value=f;
+  g.gain.setValueAtTime(0,a.currentTime+t0);
+  g.gain.linearRampToValueAtTime(vol||.14,a.currentTime+t0+.02);
+  g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t0+d);
+  o.connect(g); g.connect(a.destination); o.start(a.currentTime+t0); o.stop(a.currentTime+t0+d+.05);
+}
+var PENTA=[523,587,659,784,880,1046,1175];
+function sTap(){ tone(PENTA[Math.floor(Math.random()*5)],0,.22) }
+function sWrong(){ tone(300,0,.28,.07,"triangle") }
+function sOk(){ [0,2,4].forEach(function(n,i){tone(PENTA[n],i*.08,.35)}) }
+function sWin(){ PENTA.forEach(function(f,i){tone(f,i*.08,.45)}) }
+
+/* ---------- drawing ---------- */
+function face(k){
+  var eyes='<circle cx="-10" cy="-180" r="3.6" fill="#22324a"/><circle cx="10" cy="-180" r="3.6" fill="#22324a"/>';
+  if(k==="uneasy") return eyes+'<path d="M-17 -191 L-5 -187 M17 -191 L5 -187" stroke="#22324a" stroke-width="3" stroke-linecap="round"/><path d="M-8 -166 Q-3 -170 0 -166 Q4 -162 8 -166" fill="none" stroke="#22324a" stroke-width="3" stroke-linecap="round"/>';
+  if(k==="angry") return eyes+'<path d="M-18 -190 L-4 -184 M18 -190 L4 -184" stroke="#22324a" stroke-width="3.5" stroke-linecap="round"/><path d="M-9 -162 Q0 -170 9 -162" fill="none" stroke="#22324a" stroke-width="3" stroke-linecap="round"/>';
+  if(k==="sad") return eyes+'<path d="M-17 -187 L-5 -191 M17 -187 L5 -191" stroke="#22324a" stroke-width="3" stroke-linecap="round"/><path d="M-9 -162 Q0 -170 9 -162" fill="none" stroke="#22324a" stroke-width="3" stroke-linecap="round"/>';
+  if(k==="surprised") return '<circle cx="-10" cy="-180" r="5" fill="#22324a"/><circle cx="10" cy="-180" r="5" fill="#22324a"/><circle cx="0" cy="-164" r="5" fill="none" stroke="#22324a" stroke-width="3"/>';
+  if(k==="neutral") return eyes+'<path d="M-8 -166 L8 -166" stroke="#22324a" stroke-width="3" stroke-linecap="round"/>';
+  return eyes+'<path d="M-10 -168 Q0 -157 10 -168" fill="none" stroke="#22324a" stroke-width="3" stroke-linecap="round"/>';
+}
+var bobN=0;
+function kid(x,y,o){
+  o=o||{}; var s=o.s||1, d=o.dir||1, shirt=o.shirt||"#2a9d8f", skin=o.skin||"#f0c29c", hair=o.hair||"#4a3426", pants=o.pants||"#3d4a66";
+  var al=o.l||[-36,-78], ar=o.r||[36,-78];
+  function arm(p,sx){ return '<line x1="'+sx+'" y1="-136" x2="'+p[0]+'" y2="'+p[1]+'" stroke="'+shirt+'" stroke-width="15" stroke-linecap="round"/><circle cx="'+p[0]+'" cy="'+p[1]+'" r="9" fill="'+skin+'"/>'; }
+  var rot=o.lean?' rotate('+o.lean+')':'';
+  bobN++;
+  return '<g class="'+(o.still?'':'bob ')+(o.role||'oth')+'" style="animation-delay:-'+((bobN%5)*.5)+'s"><g transform="translate('+x+','+y+') scale('+(d*s)+','+s+')'+rot+'">'+
+    '<rect x="-19" y="-72" width="15" height="72" rx="7" fill="'+pants+'"/><rect x="4" y="-72" width="15" height="72" rx="7" fill="'+pants+'"/>'+
+    '<ellipse cx="-10" cy="0" rx="16" ry="6" fill="#1f2a3d"/><ellipse cx="12" cy="0" rx="16" ry="6" fill="#1f2a3d"/>'+
+    arm(al,-26)+'<rect x="-29" y="-152" width="58" height="88" rx="22" fill="'+shirt+'"/>'+arm(ar,26)+
+    '<circle cx="0" cy="-178" r="30" fill="'+skin+'"/>'+
+    '<path d="M-30 -182 Q-27 -214 0 -212 Q28 -214 30 -182 Q14 -198 -30 -182Z" fill="'+hair+'"/>'+
+    face(o.face)+'</g></g>';
+}
+function ring(x,y,w){ return '<ellipse cx="'+x+'" cy="'+(y+4)+'" rx="'+(w||52)+'" ry="14" fill="#f2c14e" opacity=".55"/>'; }
+function bg(){
+  return '<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9ecf7"/><stop offset="1" stop-color="#f1f8fc"/></linearGradient></defs>'+
+    '<rect width="800" height="420" fill="url(#sky)"/><circle cx="700" cy="70" r="34" fill="#fbe7a1"/>'+
+    '<rect y="360" width="800" height="60" fill="#bfe3c4"/><rect x="60" y="250" width="14" height="112" fill="#9a7a5a"/><circle cx="67" cy="225" r="58" fill="#8fcf9d"/><circle cx="40" cy="250" r="38" fill="#a4dcb0"/>';
+}
+function bubble(x,y,w,txt,fs){
+  var cx=x+w/2;
+  return '<g><rect x="'+x+'" y="'+y+'" width="'+w+'" height="64" rx="22" fill="#fff" stroke="#c9d3df" stroke-width="3"/><polygon points="'+(cx-14)+','+(y+64)+' '+(cx+6)+','+(y+64)+' '+(cx-8)+','+(y+88)+'" fill="#fff" stroke="#c9d3df" stroke-width="3"/><rect x="'+(cx-16)+'" y="'+(y+58)+'" width="24" height="10" fill="#fff"/><text x="'+cx+'" y="'+(y+46)+'" font-size="'+(fs||40)+'" text-anchor="middle">'+txt+'</text></g>';
+}
+function ME(o){ o=o||{}; o.shirt=G.hero; o.role='me'; return o }
+
+/* ---------- scenes ---------- */
+var SC=[
+ { id:0, nm:"צוחקים עליי", ic:"😜",
+  svg:function(){
+    return bg()+ring(320,360,50)+ring(470,360,50)+
+      kid(320,360,ME({face:"happy",l:[-34,-80],r:[36,-80]}))+'<text x="372" y="150" font-size="34">💧</text>'+
+      kid(470,360,{shirt:"#e76f51",skin:"#e8b48a",hair:"#2b2118",face:"happy",dir:-1,l:[-70,-130],r:[36,-80]})+bubble(500,92,110,"😜");
+  },
+  opts:[{e:"😂",t:"צוחק, ובפנים לא נעים",o:"🔁🤔"},{e:"🗣️✋",t:"אומר בקול",ok:1},{e:"😠👊",t:"מגיב בכוח",o:"💥😬"}],
+  sentence:"זה לא מצחיק אותי. תפסיק.",
+  pat:[/תפסיק/,/עצור/,/עזוב/,/לא מצחיק/,/לא נעים/,/לא כיף/,/(^|\s)די(\s|$)/,/לא אוהב/] },
+ { id:1, nm:"לוקחים לי דברים", ic:"🎒",
+  svg:function(){
+    return bg()+ring(300,360,50)+ring(500,360,50)+
+      kid(300,360,ME({face:"uneasy",l:[60,-130],r:[36,-80]}))+
+      kid(500,360,{shirt:"#e76f51",skin:"#e8b48a",hair:"#2b2118",face:"happy",dir:-1,l:[-60,-170],r:[36,-80]})+
+      '<text x="398" y="150" font-size="52">🎒</text>';
+  },
+  opts:[{e:"🗣️🎒",t:"מבקש בחזרה",ok:1},{e:"🤬📢",t:"צועק",o:"😳🔊"},{e:"🤐😞",t:"נשאר בשקט",o:"😞🎒❌"}],
+  sentence:"זה שלי. תחזיר לי.",
+  pat:[/תחזיר/,/זה שלי/,/לא שלך/,/תן לי (את|בחזרה)/,/החזר/] },
+ { id:2, nm:"דוחפים אותי", ic:"😖",
+  svg:function(){
+    return bg()+ring(330,360,50)+ring(430,360,50)+
+      kid(330,360,ME({face:"happy",l:[-34,-80],r:[36,-80],lean:-8}))+'<text x="380" y="150" font-size="34">💧</text>'+
+      kid(430,360,{shirt:"#6c8ebf",hair:"#2b2118",face:"happy",dir:-1,l:[-62,-125],r:[36,-80]})+
+      '<text x="360" y="90" font-size="44" text-anchor="middle">😖</text>';
+  },
+  opts:[{e:"😅",t:"צוחק, ובפנים לא נעים",o:"🔁😣"},{e:"🏃💨",t:"בורח",o:"😮"},{e:"🛑🗣️",t:"אומר, ואם ממשיך — למבוגר",ok:1}],
+  sentence:"תפסיק. זה לא נעים לי.", note:"אם זה ממשיך, או אם מישהו פוגע בך בגוף: הולכים למבוגר. זו לא אשמתך.",
+  pat:[/לא כיף/,/לא נעים/,/תפסיק/,/(^|\s)די(\s|$)/,/תרד/,/לא אוהב/] },
+ { id:3, nm:"כשזה לא נפסק", ic:"💢",
+  svg:function(){
+    return bg()+ring(320,360,50)+ring(500,360,50)+
+      kid(320,360,ME({face:"angry",l:[-34,-110],r:[36,-110]}))+'<text x="270" y="130" font-size="46">💢</text>'+
+      kid(500,360,{shirt:"#e76f51",skin:"#e8b48a",hair:"#2b2118",face:"happy",dir:-1,l:[-50,-110],r:[36,-80]})+'<text x="590" y="130" font-size="40">😜</text>';
+  },
+  opts:[{e:"😤👊",t:"מכה",o:"💥😰"},{e:"🚶💨🏫",t:"עוזב אחרי שאמרתי, ואומר למבוגר",ok:1},{e:"😶",t:"נשאר בשקט",o:"🎈💥"}],
+  sentence:"אמרתי תפסיק. אני הולך להגיד למורה.", note:"לבקש עזרה זה בסדר. זה פתרון חכם.",
+  pat:[/צריך עזרה/,/מבוגר/,/(הגיד|אגיד|אספר|לספר|אומר|לומר).{0,10}(למורה|למבוגר|לאמא|לאבא|ליועצת)/,/עזרה/] },
+ { id:4, nm:"לא משתפים אותי", ic:"🏀",
+  svg:function(){
+    return bg()+ring(260,360,50)+ring(500,360,50)+ring(590,360,50)+
+      kid(260,360,ME({face:"sad",l:[-34,-80],r:[36,-80]}))+
+      kid(500,360,{shirt:"#e76f51",skin:"#e8b48a",hair:"#2b2118",face:"happy",dir:-1,l:[-50,-110],r:[36,-80]})+
+      kid(590,360,{shirt:"#9b5de5",hair:"#2b2118",face:"happy",dir:-1,l:[-34,-80],r:[40,-120]})+
+      '<text x="545" y="170" font-size="58" text-anchor="middle">🏀</text>';
+  },
+  opts:[{e:"😞🚶",t:"הולך בצד",o:"😞🔇"},{e:"🙋‍♂️🏀",t:"מבקש להצטרף",ok:1},{e:"😡🏀💥",t:"מקלקל להם",o:"🙅😠"}],
+  sentence:"אפשר להצטרף אליכם? אם אין מקום, אני אשחק עם מישהו אחר.",
+  pat:[/(אפשר|אני יכול|אני רוצה|בא לי|תנו לי).{0,12}(לשחק|להצטרף)/,/להצטרף/,/גם אני/,/תצרפו/] },
+ { id:5, nm:"מחקים אותי", ic:"🦜",
+  svg:function(){
+    return bg()+ring(320,360,50)+ring(480,360,50)+
+      kid(320,360,ME({face:"uneasy",l:[-34,-80],r:[36,-80]}))+
+      kid(480,360,{shirt:"#6c8ebf",skin:"#e8b48a",hair:"#2b2118",face:"uneasy",dir:-1,l:[-34,-80],r:[36,-80]})+
+      bubble(430,40,100,"🦜");
+  },
+  opts:[{e:"🗣️🦜",t:"אומר שלא נעים",ok:1},{e:"😳🤐",t:"מתבייש",o:"😳🔁"},{e:"🦜😡",t:"מחקה בחזרה",o:"🔁🔁😖"}],
+  sentence:"אני לא אוהב שמחקים אותי. תפסיק.",
+  pat:[/מחקים/,/מחקה/,/לחקות/,/תפסיק/,/לא אוהב/,/לא נעים/] }
+];
+
+/* ---------- detective cases: laughing WITH me or AT me? ---------- */
+function T(x,y,s,e){ return '<text x="'+x+'" y="'+y+'" font-size="'+s+'" text-anchor="middle">'+e+'</text>' }
+var RED={shirt:"#e76f51",skin:"#e8b48a",hair:"#2b2118"}, BLU={shirt:"#6c8ebf",hair:"#2b2118"}, PUR={shirt:"#9b5de5",skin:"#e8b48a",hair:"#6b4a2b"};
+function O(base,ext){ var o={}; for(var k in base) o[k]=base[k]; for(var j in ext) o[j]=ext[j]; return o }
+var DET=[
+ { id:0, nm:"הבדיחה של כולם", ic:"🤣", ans:"with", sit:"מישהו סיפר בדיחה, וכולם צוחקים.",
+  svg:function(){ return bg()+kid(250,360,ME({face:"happy",l:[-40,-110],r:[40,-110]}))+kid(420,360,O(BLU,{face:"happy",dir:-1}))+kid(560,360,O(RED,{face:"happy",dir:-1,r:[40,-120]}))+T(250,120,40,"😂")+T(420,120,40,"😂")+T(560,120,40,"😂") },
+  clues:[{e:"😄",t:"גם אני צוחק, ונעים לי"},{e:"💬",t:"צוחקים על הבדיחה, לא עליי"},{e:"🤝",t:"כולנו באותו צד"}] },
+ { id:1, nm:"נפלתי בהפסקה", ic:"🤕", ans:"at", go:0, sit:"נפלתי, ושני ילדים מצביעים עליי וצוחקים.",
+  svg:function(){ return bg()+kid(230,360,ME({face:"sad",lean:-28}))+T(200,150,40,"💫")+kid(470,360,O(RED,{face:"happy",dir:-1,r:[90,-140]}))+kid(590,360,O(PUR,{face:"happy",dir:-1,r:[90,-140]}))+T(380,170,40,"👈")+T(470,110,36,"😂")+T(590,110,36,"😂") },
+  clues:[{e:"👉",t:"מצביעים עליי"},{e:"😞",t:"רק הם צוחקים. לי לא נעים"},{e:"🙅",t:"אף אחד לא עוזר לי לקום"}] },
+ { id:2, nm:"עצר כשביקשתי", ic:"🛑", ans:"with", sit:"חבר התבדח איתי. אמרתי ״די״ — והוא הפסיק וחייך.",
+  svg:function(){ return bg()+kid(300,360,ME({face:"happy",r:[60,-130]}))+kid(480,360,O(BLU,{face:"happy",dir:-1,l:[-30,-80],r:[30,-80]}))+bubble(220,40,110,"🛑")+bubble(450,40,110,"👍") },
+  clues:[{e:"🛑",t:"אמרתי די — והוא עצר מיד"},{e:"🙂",t:"הפנים שלו חמות וחברותיות"},{e:"😄",t:"גם לי היה כיף"}] },
+ { id:3, nm:"לא מפסיק", ic:"🔁", ans:"at", go:3, sit:"אמרתי ״די״, אבל הוא ממשיך וקורא לעוד ילדים לראות.",
+  svg:function(){ return bg()+kid(260,360,ME({face:"uneasy",r:[60,-130]}))+bubble(180,40,110,"🛑")+kid(450,360,O(RED,{face:"happy",dir:-1,l:[60,-170]}))+T(520,110,40,"📣")+kid(640,360,O(PUR,{face:"surprised",dir:-1,s:.85}))+kid(720,360,O(BLU,{face:"happy",dir:-1,s:.85})) },
+  clues:[{e:"🔁",t:"אמרתי די, והוא ממשיך"},{e:"📣",t:"קורא לעוד ילדים לצפות"},{e:"😣",t:"אני מרגיש קטן ומבויש"}] },
+ { id:4, nm:"פרצוף מצחיק", ic:"🤪", ans:"with", sit:"הייתי עצוב. חבר עשה פרצוף מצחיק כדי שאחייך.",
+  svg:function(){ return bg()+kid(300,360,ME({face:"happy"}))+T(300,120,38,"🙂")+kid(470,360,O(BLU,{face:"surprised",dir:-1,l:[-40,-190],r:[40,-190]}))+bubble(420,30,110,"🤪")+T(385,200,34,"💛") },
+  clues:[{e:"💛",t:"הוא רוצה שארגיש טוב"},{e:"👀",t:"הוא מסתכל עליי בחום"},{e:"😊",t:"אחרי זה נהיה לי יותר טוב"}] },
+ { id:5, nm:"לוחשים ומסתכלים", ic:"🤫", ans:"at", go:4, sit:"שני ילדים לוחשים, מסתכלים עליי ומצחקקים.",
+  svg:function(){ return bg()+kid(220,360,ME({face:"sad"}))+T(220,120,36,"❓")+kid(500,360,O(RED,{face:"happy",dir:-1,l:[20,-170]}))+kid(570,360,O(PUR,{face:"happy",dir:-1,lean:-10}))+T(540,110,44,"🤭")+T(420,170,34,"👀") },
+  clues:[{e:"🤫",t:"לוחשים ומסתירים ממני"},{e:"👀",t:"מסתכלים עליי ואז צוחקים"},{e:"🚪",t:"לא מזמינים אותי להצטרף"}] },
+ { id:6, nm:"הבדיחה שלי", ic:"🎤", ans:"with", sit:"אני סיפרתי בדיחה, וכל החברים צחקו.",
+  svg:function(){ return bg()+kid(260,360,ME({face:"happy",l:[-50,-170],r:[50,-170]}))+bubble(200,30,120,"🎤😄")+kid(450,360,O(BLU,{face:"happy",dir:-1}))+kid(580,360,O(RED,{face:"happy",dir:-1}))+T(450,110,36,"👏")+T(580,110,36,"😂") },
+  clues:[{e:"🎤",t:"אני התחלתי את הצחוק"},{e:"😄",t:"אני צוחק יחד איתם"},{e:"👏",t:"אומרים לי: ״איזה מצחיק אתה!״"}] },
+ { id:7, nm:"צוחקים על השם שלי", ic:"🏷️", ans:"at", go:5, sit:"כל יום הוא הופך את השם שלי לשם מצחיק, וכולם צוחקים.",
+  svg:function(){ return bg()+kid(250,360,ME({face:"sad"}))+T(250,110,40,"😔")+kid(460,360,O(RED,{face:"happy",dir:-1}))+bubble(400,40,120,"🏷️😜")+kid(600,360,O(BLU,{face:"happy",dir:-1,s:.9}))+T(600,120,34,"😂")+T(700,90,30,"📅🔁") },
+  clues:[{e:"📅",t:"זה קורה שוב ושוב"},{e:"🏷️",t:"צוחקים על משהו שלי: שם, בגדים, גוף"},{e:"💔",t:"אני לא צוחק. לי כואב"}] }
+];
+function detSolved(){ return DET.filter(function(c){return G.det[c.id]}).length }
+var manual=false;
+function logPush(e){ e.t=Date.now(); G.log.push(e); G.log=G.log.slice(-40); save() }
+
+/* ---------- shared UI ---------- */
+function burst(n){
+  if(G.calm) return;
+  var set=["⭐","✨","🎉","🌟"];
+  for(var i=0;i<(n||18);i++){
+    var s=document.createElement("span"); s.className="fly"; s.textContent=set[i%4];
+    s.style.left=(40+Math.random()*20)+"vw"; s.style.top="45vh";
+    s.style.setProperty("--dx",(Math.random()*700-350)+"px"); s.style.setProperty("--dy",(Math.random()*-450-60)+"px");
+    document.body.appendChild(s); setTimeout((function(el){return function(){el.remove()}})(s),1500);
+  }
+}
+function heroSvg(){ return '<svg viewBox="-60 -240 120 250">'+kid(0,0,{shirt:G.hero,face:"happy",still:1})+'</svg>' }
+function chipHtml(){
+  var r=rankOf(G.xp), nx=RANKS[r+1], pct=nx?Math.round((G.xp-RANKS[r].x)/(nx.x-RANKS[r].x)*100):100;
+  return '<div class="chip" id="chip">'+heroSvg()+'<div><b>'+RANKS[r].e+' '+RANKS[r].n+'</b><small>'+G.xp+' נק׳'+(nx?' · עד '+nx.n+' '+(nx.x-G.xp):'')+'</small><div class="xpbar"><i style="width:'+pct+'%"></i></div></div></div>';
+}
+function topbar(left){
+  return '<div class="top">'+chipHtml()+'<div class="tools">'+(left||'')+'<button class="tbtn'+(G.words?' active':'')+'" id="bWords" title="מילים" aria-label="הצג מילים">אא</button><button class="tbtn'+(muted?' active':'')+'" id="bMute" title="שקט" aria-label="שקט">'+(muted?'🔇':'🔊')+'</button><button class="tbtn" id="bCloset" title="הארון שלי" aria-label="הארון שלי">👕</button><button class="tbtn'+(G.calm?' active':'')+'" id="bCalm" title="רגוע" aria-label="מצב רגוע">🌿</button></div></div>';
+}
+function bindTop(){
+  document.body.classList.toggle("words",!!G.words); document.body.classList.toggle("calm",!!G.calm);
+  var w=$("bWords"),m=$("bMute"),c=$("bCloset"),cm=$("bCalm");
+  if(w) w.onclick=function(){ G.words=!G.words; save(); document.body.classList.toggle("words",G.words); w.classList.toggle("active",G.words); sTap() };
+  if(m) m.onclick=function(){ muted=!muted; m.textContent=muted?"🔇":"🔊"; m.classList.toggle("active",muted) };
+  if(c) c.onclick=closet;
+  if(cm) cm.onclick=function(){ G.calm=!G.calm; save(); document.body.classList.toggle("calm",G.calm); cm.classList.toggle("active",G.calm); sTap() };
+}
+function starsHtml(n){ var s=""; for(var i=0;i<3;i++) s+='<span class="'+(i<n?"":"off")+'">★</span>'; return '<span class="stars">'+s+'</span>' }
+
+function closet(){
+  if(document.querySelector(".modal")) return;
+  var d=document.createElement("div"); d.className="modal"; d.setAttribute("role","dialog"); d.setAttribute("aria-modal","true");
+  var sw=COLORS.map(function(k){ var ok=G.xp>=k.x; return '<button class="sw'+(G.hero===k.c?' sel':'')+(ok?'':' lock')+'" data-c="'+k.c+'" aria-label="צבע גיבור'+(ok?'':' (נעול)')+'" style="background:'+k.c+'" title="'+(ok?'':'נפתח ב-'+k.x+' נק׳')+'"></button>' }).join("");
+  var cd=SC.map(function(s){ var c=Math.min(3,G.done[s.id]||0); return c?'<div class="mc '+(c==3?'gold':c==2?'rare':'')+'"><div class="ri">'+s.ic+'</div>'+s.sentence+'</div>':'<div class="mc lk"><div class="ri">❓</div>עוד לא נאסף</div>' }).join("");
+  d.innerHTML='<div class="mbox"><h2>הארון שלי</h2><div class="lbl">צבע הגיבור שלי</div><div class="swatches">'+sw+'</div><div class="lbl">קלפי הכוח שלי</div><div class="cards">'+cd+'</div><div style="text-align:center;margin-top:16px"><button class="big" id="mclose">סגור</button></div></div>';
+  document.body.appendChild(d);
+  d.onclick=function(e){ if(e.target===d) d.remove() };
+  $("mclose").onclick=function(){ d.remove() };
+  Array.prototype.forEach.call(d.querySelectorAll(".sw"),function(el){ el.onclick=function(){ if(el.classList.contains("lock")) return; G.hero=el.dataset.c; save(); sTap(); var ch=$("chip"); if(ch) ch.outerHTML=chipHtml(); Array.prototype.forEach.call(d.querySelectorAll(".sw"),function(x){x.classList.remove("sel")}); el.classList.add("sel") } });
+}
+
+/* ---------- home ---------- */
+var Q=null, P=null, SEQ=0;
+function home(){
+  stopAll(); Q=null; P=null;
+  var t=SC.map(function(s){ return '<button class="tile" data-id="'+s.id+'"><div class="ic">'+s.ic+'</div><div class="nm">'+s.nm+'</div>'+starsHtml(Math.min(3,G.done[s.id]||0))+'</button>' }).join("");
+  var ds=detSolved();
+  $("app").innerHTML=topbar('<button class="tbtn mk'+(manual?' active':'')+'" id="bMark" title="סימון ידני" aria-label="סימון ידני">✏️</button>')+manualBar()+'<h1>אקדמיית התגובות</h1><p class="sub">בחר מצב. תתרגל. תגיד בקול. כל משפט הופך לקלף.</p><div class="tiles">'+t+'</div>'+
+    '<button class="detbtn" id="bDet"><span class="ic">🕵️</span><span><b>שלב הבלש</b><small>צוחקים איתי או עליי? מחפשים רמזים ומחליטים.</small></span><span class="prog">'+ds+'/'+DET.length+' תיקים</span></button>'+
+    '<div class="cta"><button class="big gold" id="bChal">🔀 מעורב: 3 מצבים</button><button class="big" id="bMirror" style="background:#6c8ebf;box-shadow:0 5px 0 #4d6a99">📷 מראה (אופציונלי)</button></div>'+teacherHtml();
+  bindTop(); bindMark(home);
+  Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(b){ b.onclick=function(){
+    sTap(); var id=+b.dataset.id;
+    if(manual){ var c=Math.min(3,G.done[id]||0), n=c>=3?0:c+1; G.done[id]=n; logPush({id:id,m:1,n:n}); home(); return }
+    play([id],false) } });
+  $("bDet").onclick=function(){ sTap(); detHome() };
+  $("bChal").onclick=function(){ sTap(); play(randIds(),true) };
+  $("bMirror").onclick=function(){ sTap(); mirror() };
+}
+function manualBar(){
+  return manual?'<div class="mbar"><span>✏️ מצב סימון ידני: לחיצה על מצב מוסיפה כוכב (אחרי 3 — מתאפס). בשלב הבלש: לחיצה על תיק מסמנת/מבטלת.</span><button class="tbtn" id="bMarkOff">סיום סימון</button></div>':'';
+}
+function bindMark(back){
+  document.body.classList.toggle("manual",manual);
+  var b=$("bMark"); if(b) b.onclick=function(){ manual=!manual; sTap(); back() };
+  var o=$("bMarkOff"); if(o) o.onclick=function(){ manual=false; sTap(); back() };
+}
+
+/* ---------- detective stage ---------- */
+function detHome(){
+  stopAll(); Q=null; P=null;
+  var cs=DET.map(function(c){ return '<button class="case'+(G.det[c.id]?' solved':'')+'" data-id="'+c.id+'"><div class="ic">'+c.ic+'</div><div class="nm">תיק '+(c.id+1)+'<br>'+c.nm+'</div></button>' }).join("");
+  var nxt=DET.filter(function(c){return !G.det[c.id]})[0];
+  $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button><button class="tbtn mk'+(manual?' active':'')+'" id="bMark" title="סימון ידני" aria-label="סימון ידני">✏️</button>')+manualBar()+
+    '<h1>🕵️ שלב הבלש</h1><p class="sub">צוחקים <b>איתי</b> או <b>עליי</b>? פותחים רמזים, חושבים — ומחליטים.</p><div class="cases">'+cs+'</div>'+
+    '<div class="cta" style="justify-content:center"><button class="big gold" id="bNext">'+(nxt?'🔍 לתיק הבא':'🔀 תיק אקראי')+'</button></div>'+
+    '<div class="tipbox" style="text-align:center">💡 לא בטוח? מותר לשאול: ״אתם צוחקים איתי או עליי?״<br>ואם לי לא נעים — זה כבר לא צחוק משותף.</div>';
+  bindTop(); bindMark(detHome); $("bHome").onclick=home;
+  Array.prototype.forEach.call(document.querySelectorAll(".case"),function(b){ b.onclick=function(){
+    sTap(); var id=+b.dataset.id;
+    if(manual){ if(G.det[id]) delete G.det[id]; else G.det[id]=1; logPush({d:id,m:1,n:G.det[id]?1:0}); detHome(); return }
+    detCase(id) } });
+  $("bNext").onclick=function(){ sTap(); detCase(nxt?nxt.id:Math.floor(Math.random()*DET.length)) };
+}
+function detCase(id){
+  stopAll(); var c=DET[id], open=0, tries=0, done=false;
+  $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button><button class="tbtn" id="bBack">🗂️ תיקים</button>')+
+    '<div class="scene"><svg id="stage" viewBox="0 0 800 420" role="img" aria-label="'+c.nm+'">'+c.svg()+'</svg><div id="thought"></div></div>'+
+    '<div class="sit">תיק '+(c.id+1)+': '+c.sit+'</div><div class="heard" style="text-align:center" id="dh">🔍 לחץ על הכרטיסים כדי לגלות רמזים</div>'+
+    '<div class="clues">'+c.clues.map(function(k,i){ return '<button class="clue" data-i="'+i+'">🔍<small>רמז '+(i+1)+'</small></button>' }).join("")+'</div>'+
+    '<div class="verdict"><button id="vWith" disabled><span>😄</span>צוחקים איתי</button><button id="vAt" disabled><span>😟</span>צוחקים עליי</button></div><div id="vres"></div>';
+  bindTop(); $("bHome").onclick=home; $("bBack").onclick=detHome;
+  function reveal(b){ var k=c.clues[+b.dataset.i]; if(b.classList.contains("open")) return; b.classList.add("open"); b.innerHTML=k.e+'<small>'+k.t+'</small>'; open++; }
+  Array.prototype.forEach.call(document.querySelectorAll(".clue"),function(b){ b.onclick=function(){
+    if(b.classList.contains("open")) return; sTap(); reveal(b);
+    if(open>=2){ $("vWith").disabled=false; $("vAt").disabled=false; $("dh").textContent="מה אתה חושב? אפשר לפתוח עוד רמז או להחליט." } } });
+  function verdict(pick,btn){
+    if(done) return; tries++;
+    if(pick!==c.ans){ sWrong(); btn.classList.add("wrong"); thought("🤔"); $("dh").textContent="בדוק שוב את הרמזים — מה הם אומרים?";
+      Array.prototype.forEach.call(document.querySelectorAll(".clue"),reveal); return }
+    done=true; $("dh").textContent="🕵️ פתרת את התיק!"; $("vWith").disabled=true; $("vAt").disabled=true; Array.prototype.forEach.call(document.querySelectorAll(".clue"),reveal);
+    var first=!G.det[c.id], xp=first?(tries===1?8:5):2; G.det[c.id]=(G.det[c.id]||0)+1; G.xp+=xp; logPush({d:c.id,w:tries-1});
+    sWin(); burst(14); thought(c.ans==="with"?"😄":"🕵️");
+    var chip=$("chip"); if(chip) chip.outerHTML=chipHtml();
+    var w=c.ans==="with";
+    $("vres").innerHTML='<div class="vbox'+(w?'':' at')+'"><h2>'+(w?'✔ נכון! צוחקים איתי':'✔ נכון! צוחקים עליי')+'</h2>'+
+      '<p>'+(w?'צחוק <b>איתי</b> = כולם נהנים, גם אני. ואם אבקש לעצור — עוצרים.':'צחוק <b>עליי</b> = רק להם כיף, ולי לא נעים. מותר לי לעצור את זה ולבקש עזרה.')+'</p>'+
+      '<div class="gain">+'+xp+' נקודות בלש 🕵️</div>'+
+      '<div class="cta" style="justify-content:center">'+(c.go!=null?'<button class="big" id="vGo">🎯 לתרגל איך מגיבים</button>':'')+'<button class="big gold" id="vNext">🔍 תיק הבא</button></div></div>';
+    if($("vGo")) $("vGo").onclick=function(){ sTap(); play([c.go],false) };
+    $("vNext").onclick=function(){ sTap(); var n=DET.filter(function(x){return !G.det[x.id]})[0]; if(n) detCase(n.id); else detDone() };
+    setTimeout(function(){ var v=$("vres"); if(v&&v.scrollIntoView) v.scrollIntoView({behavior:"smooth",block:"center"}) },200);
+  }
+  $("vWith").onclick=function(){ verdict("with",this) };
+  $("vAt").onclick=function(){ verdict("at",this) };
+}
+function detDone(){
+  $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button>')+'<div class="reward" style="padding:30px 0"><div style="font-size:100px">🕵️🏅</div><h1>פתרת את כל התיקים!</h1><div class="gain">אתה בלש רגשות אמיתי</div><div class="tipbox">איתי = כולם נהנים, גם אני · עליי = רק להם כיף<br>לא בטוח? שואלים. לא נעים? עוצרים ומבקשים עזרה.</div><div class="cta" style="justify-content:center"><button class="big gold" id="dAgain">🗂️ לתיקים</button><button class="big" id="hm">לבית</button></div></div>';
+  bindTop(); burst(40); sWin(); $("bHome").onclick=home; $("hm").onclick=home; $("dAgain").onclick=detHome;
+}
+
+/* ---------- optional hero mirror: live camera, no measuring, no scoring, no recording ---------- */
+function mirror(){
+  stopAll(); Q=null; P=null;
+  var poses=[{e:"🧍",t:"עומד יציב: שתי רגליים על הרצפה"},{e:"🌬️",t:"נשימה איטית: לנשום עמוק פעם אחת"},{e:"🗣️",t:"אומר ״תפסיק״ בקול רגוע"}], sel=0;
+  $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button>')+'<h1>מראה</h1><p class="sub">רק אתה רואה את עצמך. המצלמה לא מקליטה, לא שומרת ולא שולחת כלום.</p>'+
+    '<div class="scene" style="max-width:640px;margin:0 auto"><video id="vid" autoplay playsinline muted style="width:100%;display:block;transform:scaleX(-1);background:#dfe8f3;min-height:300px"></video>'+
+    '<div id="thought" style="font-size:120px;font-weight:700;color:#fff;text-shadow:0 4px 20px rgba(0,0,0,.4)"></div></div>'+
+    '<div class="opts" id="pp" style="max-width:640px;margin:14px auto 0"></div><div class="reward" style="margin-top:14px"><button class="big" id="camOn" style="background:#6c8ebf;box-shadow:0 5px 0 #4d6a99;margin-bottom:12px">המורה לידי · להפעיל מצלמה</button><br><button class="big" id="go">התחל — 5 שניות</button><div class="heard" id="mm" style="margin-top:10px">בחר תנוחה ולחץ התחל</div></div>';
+  bindTop(); $("bHome").onclick=home;
+  function draw(){ $("pp").innerHTML=poses.map(function(o,i){ return '<button class="opt'+(i===sel?' hint':'')+'" data-i="'+i+'" style="min-height:120px;font-size:44px">'+o.e+'<small style="display:block;font-size:15px">'+o.t+'</small></button>' }).join("");
+    Array.prototype.forEach.call(document.querySelectorAll("#pp .opt"),function(b){ b.onclick=function(){ sel=+b.dataset.i; sTap(); draw() } }) }
+  draw();
+  $("camOn").onclick=function(){
+    this.style.display="none"; stopCam();
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ $("mm").textContent="המצלמה לא זמינה בדפדפן הזה."; return }
+    navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(function(st){
+      if(!$("vid")){ st.getTracks().forEach(function(t){t.stop()}); return }
+      stopCam(); camStream=st; $("vid").srcObject=st;
+    }).catch(function(){ $("mm").textContent="אין גישה למצלמה. אפשר לתרגל מול מראה אמיתית." });
+  };
+  $("go").onclick=function(){
+    clearInterval(camTimer); var n=5, th=$("thought"); $("mm").textContent=poses[sel].t; th.innerHTML='<span>'+n+'</span>'; sTap();
+    camTimer=setInterval(function(){
+      n--; if(n>0){ th.innerHTML='<span>'+n+'</span>'; sTap(); return }
+      clearInterval(camTimer); th.innerHTML='<span>✔</span>'; sWin(); burst(20);
+      $("mm").textContent="סיימת. אתה קובע איך זה הרגיש לך."; setTimeout(function(){ if($("thought")) $("thought").innerHTML="" },1600);
+    },1000);
+  };
+}
+function teacherHtml(){
+  var rows=(G.log||[]).slice(-8).reverse().map(function(l){ var isD=l.d!=null, sc=isD?DET[l.d]:SC[l.id]; var d=new Date(l.t); return '<li>'+(isD?'🕵️ ':'')+(sc?sc.nm:'')+' · '+d.toLocaleDateString("he-IL")+(l.m?(isD?(l.n?' · ✏️ סומן ידנית':' · ✏️ בוטל ידנית'):' · ✏️ סומן ידנית ('+l.n+'★)'):'')+(l.h?' · נשמע: ״'+l.h+'״':'')+(l.w?' · ניסיונות נוספים: '+l.w:'')+'</li>' }).join("");
+  return '<details class="tchr"><summary>למורה: שאלות לסיכום ושימוש בטוח</summary><div><b>שאלות לשיחה אחרי כל מצב:</b><ul><li>מה קרה בפעם האחרונה שזה קרה לך באמת?</li><li>מה הרגשת בגוף ברגע ההוא?</li><li>מה ניסית לעשות, ומה קרה אחר כך?</li><li>למי תפנה בבית הספר, ומה תגיד לו?</li></ul><b>חשוב:</b><ul><li>אם עולה סיפור על פגיעה פיזית או הצקה חוזרת: לתעד, ליידע מחנך או יועצת והורים.</li><li>להבהיר לילד שזו לא אשמתו, ושמבוגרים אחראים לעזור.</li><li>לתרגל גם מצבים אמיתיים מהשבוע, לא רק במשחק.</li><li>זיהוי הקול נשלח לשרת של הדפדפן (Google או Microsoft). מומלץ לעדכן את ההורה.</li></ul><b>תרגולים אחרונים:</b><ul>'+(rows||'<li>עדיין אין</li>')+'</ul></div></details>';
+}
+function randIds(){ return SC.map(function(s){return s.id}).sort(function(){return Math.random()-.5}).slice(0,3) }
+
+/* ---------- play ---------- */
+function play(ids,chal){
+  stopAll();
+  Q={ids:ids,i:0,chal:chal,combo:0,earned:0};
+  scene();
+}
+function scene(){
+  var sc=SC[Q.ids[Q.i]]; P={sc:sc,seq:++SEQ,locked:false,wrong:0,first:true,voice:false,tries:0,done:false};
+  var dots=""; if(Q.chal){ for(var i=0;i<Q.ids.length;i++) dots+='<div class="dot'+(i<Q.i?' on':'')+(i===Q.i?' now':'')+'"></div>'; dots='<div class="dots">'+dots+'</div>' }
+  $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button>'+dots)+
+    '<div class="scene"><svg id="stage" viewBox="0 0 800 420" role="img" aria-label="'+sc.nm+'">'+sc.svg()+'</svg><div id="thought"></div></div><div class="zone" id="zone"></div>';
+  bindTop(); $("bHome").onclick=home;
+  var h='<div class="opts">';
+  sc.opts.forEach(function(o,i){ h+='<button class="opt" data-i="'+i+'" aria-label="'+o.t+'">'+o.e+'<small>'+o.t+'</small></button>' });
+  $("zone").innerHTML=h+'</div><div class="heard" style="text-align:center;margin-top:12px">👆 אפשר לנסות כל אחת. כל בחירה מראה מה קורה אחר כך.</div>';
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"),function(b){ b.classList.add("nudge"); b.onclick=function(){ pick(b) } });
+}
+function thought(e){ var t=$("thought"); if(!t) return; t.innerHTML='<span>'+e+'</span>'; setTimeout(function(){ if(t) t.innerHTML="" },1500) }
+function pick(b){
+  if(!P||P.locked) return;
+  var o=P.sc.opts[+b.dataset.i], st=$("stage"), sq=P.seq;
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"),function(x){ x.classList.remove("nudge") });
+  if(o.ok){
+    P.locked=true;
+    if(st) st.classList.add("good"); sOk(); thought("🎉");
+    Array.prototype.forEach.call(document.querySelectorAll(".opt"),function(x){ x.disabled=true; if(x!==b) x.classList.add("seen") });
+    setTimeout(function(){ if(P&&P.seq===sq&&$("zone")) sayPanel() },700);
+  } else {
+    sTap(); P.wrong++; thought(o.o||"🤔"); b.classList.add("seen");
+    if(P.wrong>=2){ var i=P.sc.opts.findIndex(function(x){return x.ok}); var c=document.querySelectorAll(".opt")[i]; if(c) c.classList.add("hint") }
+  }
+}
+
+/* ---------- speech ---------- */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var rec=null, listening=false, stream=null, an=null, raf=0, peakFrames=0, alts=[], recErr="", maxEma=0, ema=0, meterOn=false, MINVOL=0.045, mTok=0;
+var GEN=[/מספיק/,/הפסק/,/(^|\s)אל ת/,/עזוב/,/תדחוף/,/תחקה/,/(^|\s)דיי(\s|$)/];
+function norm(t){ return (t||"").replace(/[֑-ׇ]/g,"").replace(/[^א-ת\s]/g," ").replace(/\s+/g," ").trim() }
+function score(tr,sc){
+  tr=norm(tr); if(!tr) return 0;
+  if(sc.pat.some(function(r){return r.test(tr)})) return 1;
+  if((sc.id===0||sc.id===2||sc.id===5)&&GEN.some(function(r){return r.test(tr)})) return 1;
+  var tw=norm(sc.sentence).split(" ").filter(function(w){return w.length>2&&["אותי","אבל","אני"].indexOf(w)<0}), hit=0;
+  tw.forEach(function(w){ var st=w.replace(/^[והבלמכש]/,""); if(tr.indexOf(w)>-1||(st.length>2&&tr.indexOf(st)>-1)) hit++ });
+  return tw.length?hit/tw.length:0;
+}
+function startMeter(){
+  peakFrames=0; maxEma=0; ema=0; meterOn=false; var tk=++mTok;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) return;
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+    if(!listening||tk!==mTok){ s.getTracks().forEach(function(t){t.stop()}); return }
+    stream=s; var a=ctx(); if(!a) return; if(a.state==="suspended"&&a.resume) a.resume(); meterOn=true;
+    var src=a.createMediaStreamSource(s); an=a.createAnalyser(); an.fftSize=512; src.connect(an);
+    var buf=new Uint8Array(an.fftSize);
+    (function loop(){
+      if(!an) return;
+      an.getByteTimeDomainData(buf); var sum=0; for(var i=0;i<buf.length;i++){ var v=(buf[i]-128)/128; sum+=v*v }
+      var rms=Math.sqrt(sum/buf.length); if(rms>.05&&rms<.22) peakFrames++; ema=ema*.8+rms*.2; if(ema>maxEma) maxEma=ema;
+      var el=$("lvl"); if(el) el.style.width=Math.min(100,Math.round(rms*400))+"%";
+      raf=requestAnimationFrame(loop);
+    })();
+  }).catch(function(){});
+}
+function stopMeter(){ cancelAnimationFrame(raf); an=null; if(stream){ stream.getTracks().forEach(function(t){t.stop()}); stream=null } var el=$("lvl"); if(el) el.style.width="0" }
+var camStream=null, camTimer=0;
+function stopCam(){ clearInterval(camTimer); if(camStream){ camStream.getTracks().forEach(function(t){t.stop()}); camStream=null } }
+function stopAll(){ try{ if(rec) rec.abort() }catch(e){} listening=false; stopMeter(); stopCam() }
+
+function sayPanel(){
+  var sc=P.sc;
+  $("zone").innerHTML='<div class="say"><div class="lbl">המשפט שלי · תגיד אותו בקול</div><div class="sent">'+sc.sentence+'</div>'+
+    (SR?'<button class="mic" id="mic" aria-label="הקלט">🎤</button><div class="meter"><i id="lvl"></i><u></u></div><div class="mlab">המטרה: להגיע לאזור המסומן. לא צריך לצעוק.</div><div class="heard" id="heard">לחץ על המיקרופון ותגיד. אפשר גם במילים שלך.</div><button class="big" id="said" style="background:#fff;color:#1d776c;border:3px solid #1d776c;box-shadow:none;font-size:20px;padding:10px 22px;margin-top:10px">אמרתי (בלי מיקרופון) ✔</button>'
+       :'<button class="big" id="said">אמרתי בקול ✔</button>')+'</div>';
+  $("said").onclick=function(){ finish(false) };
+  if(SR) $("mic").onclick=listen;
+}
+function listen(){
+  if(listening) return; listening=true; alts=[]; recErr="";
+  var mic=$("mic"), heard=$("heard"); mic.classList.add("on"); heard.className="heard"; heard.textContent="מקשיב…"; sTap();
+  startMeter();
+  try{
+    var cur=rec=new SR(); rec.lang="he-IL"; rec.interimResults=true; rec.maxAlternatives=3; rec.continuous=false;
+    rec.onresult=function(e){
+      if(rec!==cur) return;
+      alts=[]; var live="";
+      for(var i=0;i<e.results.length;i++){ var r=e.results[i]; for(var j=0;j<r.length;j++) alts.push(r[j].transcript); live+=r[0].transcript+" " }
+      heard.textContent="שמעתי: "+live;
+    };
+    rec.onerror=function(e){ if(rec===cur) recErr=e.error||"error" };
+    rec.onend=function(){ if(rec!==cur) return; listening=false; stopMeter(); var m=$("mic"); if(m) m.classList.remove("on"); evaluate() };
+    rec.start();
+    setTimeout(function(){ if(listening&&rec===cur){ try{ cur.stop() }catch(e){} } },9000);
+    setTimeout(function(){ if(listening&&rec===cur){ listening=false; stopMeter(); var m=$("mic"); if(m) m.classList.remove("on"); evaluate() } },11000);
+  }catch(e){ listening=false; stopMeter(); mic.classList.remove("on"); recErr="start"; evaluate() }
+}
+function evaluate(){
+  if(!P||P.done) return;
+  var heard=$("heard"); if(!heard) return;
+  if(/not-allowed|service-not-allowed|network|audio-capture|language-not-supported|start/.test(recErr)){
+    heard.textContent="המיקרופון לא זמין כרגע. אפשר ללחוץ ״אמרתי בלי מיקרופון״."; heard.className="heard"; return;
+  }
+  if(!alts.length){ heard.textContent="לא שמעתי. אפשר לנסות שוב, או ללחוץ ״אמרתי״."; return }
+  P.tries++;
+  var best=0; alts.forEach(function(a){ best=Math.max(best,score(a,P.sc)) });
+  if(best>=.45&&meterOn&&maxEma<MINVOL){ var pc=Math.round(maxEma*400); heard.className="heard"; heard.textContent="שמעתי אותך. עוד קצת יותר חזק, כמו שמדברים עם מישהו שעומד לידך. (למורה: עוצמה "+pc+"%)"; return }
+  if(best>=.45){ heard.className="heard ok"; P.voice=meterOn?maxEma>=MINVOL:false; heard.textContent="✔ שמעתי: "+alts[0]+(P.voice?" · קול ברור ותקיף 👍":" · אפשר גם קצת יותר בקול, אם בא לך"); sOk(); var sq=P.seq; setTimeout(function(){ if(P&&P.seq===sq) finish(true) },900) }
+  else { heard.textContent="שמעתי: "+alts[0]+". ייתכן שהמערכת לא הבינה. אפשר שוב, או ללחוץ ״אמרתי״."; }
+}
+
+/* ---------- reward: the sentence card is the reward; repetition upgrades it ---------- */
+function finish(heardOk){
+  if(!P||P.done) return; P.done=true; stopAll();
+  var id=P.sc.id; G.done[id]=(G.done[id]||0)+1; var n=Math.min(3,G.done[id]);
+  var xp=(G.done[id]||0)===1?10:3, oldRank=rankOf(G.xp), oldXp=G.xp; G.xp+=xp; Q.earned+=xp;
+  var h=heardOk&&alts[0]?String(alts[0]).replace(/[<>&]/g,""):"";
+  G.log.push({id:id,t:Date.now(),h:h,w:P.wrong}); G.log=G.log.slice(-40);
+  save();
+  var newRank=rankOf(G.xp), unl=COLORS.filter(function(k){ return k.x>oldXp&&k.x<=G.xp }).length;
+  sWin(); burst(n===3?24:12);
+  var last=(Q.i>=Q.ids.length-1), kind=n==3?"gold":n==2?"rare":"", kn=n==3?"קלף מצטיין · תרגלת "+G.done[id]+" פעמים":n==2?"קלף נדיר · תרגלת פעמיים":"קלף כוח חדש";
+  $("zone").innerHTML='<div class="reward"><div class="rcard '+kind+'"><div class="rk">'+kn+'</div><div class="ri">'+P.sc.ic+'</div><div class="rs">'+P.sc.sentence+'</div></div>'+
+    '<div class="gain">+'+xp+' נקודות · תרגול חוזר משדרג את הקלף</div>'+
+    (P.sc.note?'<div class="unl" style="color:#1d776c">'+P.sc.note+'</div>':'')+
+    (newRank>oldRank?'<div class="unl">עלית לדרגה: '+RANKS[newRank].e+' '+RANKS[newRank].n+'!</div>':'')+
+    (unl?'<div class="unl">נפתח צבע חדש בארון! 👕</div>':'')+
+    '<button class="big" id="nx">'+(last?(Q.chal?"סיכום":"חזרה לבית"):"הלאה")+'</button></div>';
+  var chip=$("chip"); if(chip) chip.outerHTML=chipHtml();
+  $("nx").onclick=function(){
+    sTap();
+    if(!last){ Q.i++; scene() } else if(Q.chal){ summary() } else home();
+  };
+}
+function summary(){
+  $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button>')+'<div class="reward" style="padding:30px 0"><div style="font-size:100px">🏆</div><h1>סיימת את האתגר!</h1><div class="gain">הרווחת '+Q.earned+' נקודות</div><div class="cta" style="justify-content:center"><button class="big gold" id="again">⚡ עוד אתגר</button><button class="big" id="hm">לבית</button></div></div>';
+  bindTop(); burst(40); sWin();
+  $("bHome").onclick=home; $("hm").onclick=home;
+  $("again").onclick=function(){ play(randIds(),true) };
+}
+
+document.addEventListener("keydown",function(e){ if(e.key==="Escape"){ var m=document.querySelector(".modal"); if(m) m.remove() } });
+document.addEventListener("pointerdown",function(){ ctx() },{once:true});
+
+/* start (hash #N or #Nsay = open scene N, for testing) */
+var m=(location.hash||"").match(/^#(\d)(say)?$/);
+if(m&&SC[+m[1]]){ play([+m[1]],false); if(m[2]) sayPanel() } else home();
+document.documentElement.setAttribute("data-ok","1");
+})();
+</script>
+</body>
+</html>
