@@ -333,7 +333,6 @@ var DET=[
   note:"חבר אמיתי לא מבקש ממך לעשות דבר שיסבך אותך. מותר להגיד: ״לא, תודה.״" }
 ];
 var QS=[{e:"😄",t:"אני נהנה באמת — גם בפנים?"},{e:"🤝",t:"מתייחסים אליי יפה? (כשאני אומר ״די״ — עוצרים?)"},{e:"🛡️",t:"אני מרגיש בטוח — לא כואב ולא מבייש?"}];
-function speak(t){ try{ if(!window.speechSynthesis||muted) return; speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t.replace(/[^֐-׿\s.,!?״׳"']/g," ")); u.lang="he-IL"; u.rate=.9; speechSynthesis.speak(u) }catch(e){} }
 function detSolved(){ return DET.filter(function(c){return G.det[c.id]}).length }
 var manual=false;
 function logPush(e){ e.t=Date.now(); G.log.push(e); G.log=G.log.slice(-40); save() }
@@ -412,12 +411,13 @@ function detHome(){
   var cs=DET.map(function(c){ return '<button class="case'+(G.det[c.id]?' solved':'')+'" data-id="'+c.id+'"><div class="ic">'+c.ic+'</div><div class="nm">תיק '+(c.id+1)+'<br>'+c.nm+'</div></button>' }).join("");
   var nxt=DET.filter(function(c){return !G.det[c.id]})[0];
   $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button><button class="tbtn mk'+(manual?' active':'')+'" id="bMark" title="סימון ידני" aria-label="סימון ידני">✏️</button>')+manualBar()+
-    '<h1>🕵️ שלב הבלש</h1><p class="sub">צוחקים <b>איתי</b> או <b>עליי</b>? בכל תיק שואלים את אותן 3 שאלות:</p>'+
+    ''+(manual?'<div style="text-align:center;margin-bottom:12px"><button class="big gold" id="bAll">✔ סמן את כל התיקים כפתורים</button></div>':'')+'<h1>🕵️ שלב הבלש</h1><p class="sub">צוחקים <b>איתי</b> או <b>עליי</b>? בכל תיק שואלים את אותן 3 שאלות:</p>'+
     '<div class="rules">'+QS.map(function(k,i){ return '<div><span>'+(i+1)+'</span>'+k.e+' '+k.t+'</div>' }).join("")+'<p>✅ ״כן״ = בסדר · 🚩 ״לא״ = דגל אדום · ❓ ״לא יודע״ = בודקים.<br>🚩 אפילו דגל אדום אחד = צוחקים עליי.<br>🤕 כואב בגוף = תמיד לא בסדר, גם אם אומרים ״רק צחקתי״.</p></div>'+
     '<div class="cases">'+cs+'</div>'+
     '<div class="cta" style="justify-content:center"><button class="big gold" id="bNext">'+(nxt?'🔍 לתיק הבא':'🔀 תיק אקראי')+'</button></div>'+
     '<div class="tipbox" style="text-align:center">💡 לא בטוח? מותר לשאול: ״אתם צוחקים איתי או עליי?״<br>ואם לי לא נעים — זה כבר לא צחוק משותף.</div>';
   bindTop(); bindMark(detHome); $("bHome").onclick=home;
+  if($("bAll")) $("bAll").onclick=function(){ sTap(); DET.forEach(function(c){ if(!G.det[c.id]){ G.det[c.id]=1; G.xp+=8 } }); logPush({d:0,m:1,n:1,all:1}); detHome() };
   Array.prototype.forEach.call(document.querySelectorAll(".case"),function(b){ b.onclick=function(){
     sTap(); var id=+b.dataset.id;
     if(manual){ if(G.det[id]){ delete G.det[id]; G.xp=Math.max(0,G.xp-8) } else { G.det[id]=1; G.xp+=8 } logPush({d:id,m:1,n:G.det[id]?1:0}); detHome(); return }
@@ -428,12 +428,12 @@ function detCase(id){
   stopAll(); var c=DET[id], open=0, tries=0, done=false;
   $("app").innerHTML=topbar('<button class="tbtn" id="bHome">‹ בית</button><button class="tbtn" id="bBack">🗂️ תיקים</button>')+
     '<div class="scene"><svg id="stage" viewBox="0 0 800 420" role="img" aria-label="'+c.nm+'">'+c.svg()+'</svg><div id="thought"></div></div>'+
-    '<div class="sit">תיק '+(c.id+1)+': '+c.sit+' <button class="tbtn" id="bSay" aria-label="הקרא">🔊</button></div><div class="heard" style="text-align:center" id="dh">🔍 שואלים 3 שאלות בלש. לחץ על כל כרטיס.</div>'+
+    '<div class="sit">תיק '+(c.id+1)+': '+c.sit+'</div><div class="heard" style="text-align:center" id="dh">🔍 שואלים 3 שאלות בלש. לחץ על כל כרטיס.</div>'+
     '<div class="clues">'+QS.map(function(k,i){ return '<button class="clue" data-i="'+i+'">'+k.e+'<small>'+k.t+'</small></button>' }).join("")+'</div>'+
     '<div class="rulebar">🚩 אפילו דגל אחד = <b>עליי</b> · ❓ בלי דגל = <b>לא בטוח, בודקים</b> · הכול ✅ = <b>איתי</b></div>'+
     '<div class="verdict v3"><button id="vWith" disabled><span>😄</span>צוחקים איתי</button><button id="vAt" disabled><span>😟</span>צוחקים עליי</button><button id="vNs" disabled><span>🤔</span>לא בטוח</button></div><div id="vres"></div>';
-  bindTop(); $("bHome").onclick=home; $("bBack").onclick=detHome; $("bSay").onclick=function(){ speak(c.sit) };
-  function reveal(b){ var i=+b.dataset.i, a=c.q[i]; if(b.classList.contains("open")) return; b.classList.add("open",a[0]===1?"okc":a[0]===2?"unk":"flag"); b.innerHTML='<span class="qq">'+QS[i].e+' '+QS[i].t+'</span>'+(a[0]===1?"✅":a[0]===2?"❓":"🚩")+'<small>'+a[1]+'</small>'; open++; speak(a[1]); }
+  bindTop(); $("bHome").onclick=home; $("bBack").onclick=detHome;
+  function reveal(b){ var i=+b.dataset.i, a=c.q[i]; if(b.classList.contains("open")) return; b.classList.add("open",a[0]===1?"okc":a[0]===2?"unk":"flag"); b.innerHTML='<span class="qq">'+QS[i].e+' '+QS[i].t+'</span>'+(a[0]===1?"✅":a[0]===2?"❓":"🚩")+'<small>'+a[1]+'</small>'; open++; }
   function enable(){ $("vWith").disabled=false; $("vAt").disabled=false; $("vNs").disabled=false }
   Array.prototype.forEach.call(document.querySelectorAll(".clue"),function(b){ b.onclick=function(){
     if(b.classList.contains("open")) return; sTap(); reveal(b);
