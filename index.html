@@ -233,7 +233,7 @@ var SC=[
       kid(470,360,{shirt:"#e76f51",skin:"#e8b48a",hair:"#2b2118",face:"happy",dir:-1,l:[-70,-130],r:[36,-80]})+bubble(500,92,110,"😜");
   },
   opts:[{e:"😂",t:"צוחק, ובפנים לא נעים",o:"🔁🤔"},{e:"🗣️✋",t:"אומר בקול",ok:1},{e:"😠👊",t:"מגיב בכוח",o:"💥😬"}],
-  sentence:"זה לא מצחיק אותי. תפסיק.",
+  sentence:"תפסיקו בבקשה. זה לא מצחיק אותי.", strict:1,
   pat:[/תפסיק/,/עצור/,/עזוב/,/לא מצחיק/,/לא נעים/,/לא כיף/,/(^|\s)די(\s|$)/,/לא אוהב/] },
  { id:1, nm:"לוקחים לי דברים", ic:"🎒",
   svg:function(){
@@ -253,7 +253,7 @@ var SC=[
       '<text x="360" y="90" font-size="44" text-anchor="middle">😖</text>';
   },
   opts:[{e:"😅",t:"צוחק, ובפנים לא נעים",o:"🔁😣"},{e:"🏃💨",t:"בורח",o:"😮"},{e:"🛑🗣️",t:"אומר ״תפסיק״, ומספר למבוגר",ok:1}],
-  sentence:"תפסיק. אסור לדחוף.", note:"כשמישהו פוגע בך בגוף — מספרים למבוגר, גם אם זה קרה רק פעם אחת. זו לא אשמתך.",
+  sentence:"תפסיקו בבקשה. אסור לדחוף.", strict:1, note:"כשמישהו פוגע בך בגוף — מספרים למבוגר, גם אם זה קרה רק פעם אחת. זו לא אשמתך.",
   pat:[/לא כיף/,/לא נעים/,/תפסיק/,/(^|\s)די(\s|$)/,/תרד/,/לא אוהב/] },
  { id:3, nm:"כשזה לא נפסק", ic:"💢",
   svg:function(){
@@ -262,7 +262,7 @@ var SC=[
       kid(500,360,{shirt:"#e76f51",skin:"#e8b48a",hair:"#2b2118",face:"happy",dir:-1,l:[-50,-110],r:[36,-80]})+'<text x="590" y="130" font-size="40">😜</text>';
   },
   opts:[{e:"😤👊",t:"מכה",o:"💥😰"},{e:"🚶💨🏫",t:"עוזב אחרי שאמרתי, ואומר למבוגר",ok:1},{e:"😶",t:"נשאר בשקט",o:"🎈💥"}],
-  sentence:"אמרתי תפסיק. אני הולך להגיד למורה.", note:"לבקש עזרה זה בסדר. זה פתרון חכם.",
+  sentence:"אמרתי ״תפסיקו בבקשה״. אני הולך להגיד למורה.", note:"לבקש עזרה זה בסדר. זה פתרון חכם.",
   pat:[/צריך עזרה/,/מבוגר/,/(הגיד|אגיד|אספר|לספר|אומר|לומר).{0,10}(למורה|למבוגר|לאמא|לאבא|ליועצת)/,/עזרה/] },
  { id:4, nm:"לא משתפים אותי", ic:"🏀",
   svg:function(){
@@ -283,7 +283,7 @@ var SC=[
       bubble(430,40,100,"🦜");
   },
   opts:[{e:"🗣️🦜",t:"אומר שלא נעים",ok:1},{e:"😳🤐",t:"מתבייש",o:"😳🔁"},{e:"🦜😡",t:"מחקה בחזרה",o:"🔁🔁😖"}],
-  sentence:"אני לא אוהב שמחקים אותי. תפסיק.",
+  sentence:"תפסיקו בבקשה. אני לא אוהב שמחקים אותי.", strict:1,
   pat:[/מחקים/,/מחקה/,/לחקות/,/תפסיק/,/לא אוהב/,/לא נעים/] }
 ];
 
@@ -543,6 +543,7 @@ var GEN=[/מספיק/,/הפסק/,/(^|\s)אל ת/,/עזוב/,/תדחוף/,/תחק
 function norm(t){ return (t||"").replace(/[֑-ׇ]/g,"").replace(/[^א-ת\s]/g," ").replace(/\s+/g," ").trim() }
 function score(tr,sc){
   tr=norm(tr); if(!tr) return 0;
+  if(sc.strict) return /תפסיקו? ?בבקשה/.test(tr)?1:0;
   if(sc.pat.some(function(r){return r.test(tr)})) return 1;
   if((sc.id===0||sc.id===2||sc.id===5)&&GEN.some(function(r){return r.test(tr)})) return 1;
   var tw=norm(sc.sentence).split(" ").filter(function(w){return w.length>2&&["אותי","אבל","אני"].indexOf(w)<0}), hit=0;
@@ -574,7 +575,7 @@ function stopAll(){ try{ if(rec) rec.abort() }catch(e){} listening=false; stopMe
 function sayPanel(){
   var sc=P.sc;
   $("zone").innerHTML='<div class="say"><div class="lbl">המשפט שלי · תגיד אותו בקול</div><div class="sent">'+sc.sentence+'</div>'+
-    (SR?'<button class="mic" id="mic" aria-label="הקלט">🎤</button><div class="meter"><i id="lvl"></i><u></u></div><div class="mlab">המטרה: להגיע לאזור המסומן. לא צריך לצעוק.</div><div class="heard" id="heard">לחץ על המיקרופון ותגיד. אפשר גם במילים שלך.</div><button class="big" id="said" style="background:#fff;color:#1d776c;border:3px solid #1d776c;box-shadow:none;font-size:20px;padding:10px 22px;margin-top:10px">אמרתי (בלי מיקרופון) ✔</button>'
+    (SR?'<button class="mic" id="mic" aria-label="הקלט">🎤</button><div class="meter"><i id="lvl"></i><u></u></div><div class="mlab">המטרה: להגיע לאזור המסומן. לא צריך לצעוק.</div><div class="heard" id="heard">'+(sc.strict?'לחץ על המיקרופון ותגיד: ״תפסיקו בבקשה״.':'לחץ על המיקרופון ותגיד. אפשר גם במילים שלך.')+'</div><button class="big" id="said" style="background:#fff;color:#1d776c;border:3px solid #1d776c;box-shadow:none;font-size:20px;padding:10px 22px;margin-top:10px">אמרתי (בלי מיקרופון) ✔</button>'
        :'<button class="big" id="said">אמרתי בקול ✔</button>')+'</div>';
   $("said").onclick=function(){ finish(false) };
   if(SR) $("mic").onclick=listen;
@@ -609,7 +610,7 @@ function evaluate(){
   var best=0; alts.forEach(function(a){ best=Math.max(best,score(a,P.sc)) });
   if(best>=.45&&meterOn&&maxEma<MINVOL){ var pc=Math.round(maxEma*400); heard.className="heard"; heard.textContent="שמעתי אותך. עוד קצת יותר חזק, כמו שמדברים עם מישהו שעומד לידך. (למורה: עוצמה "+pc+"%)"; return }
   if(best>=.45){ heard.className="heard ok"; P.voice=meterOn?maxEma>=MINVOL:false; heard.textContent="✔ שמעתי: "+alts[0]+(P.voice?" · קול ברור ותקיף 👍":" · אפשר גם קצת יותר בקול, אם בא לך"); sOk(); var sq=P.seq; setTimeout(function(){ if(P&&P.seq===sq) finish(true) },900) }
-  else { heard.textContent="שמעתי: "+alts[0]+". ייתכן שהמערכת לא הבינה. אפשר שוב, או ללחוץ ״אמרתי״."; }
+  else { heard.textContent="שמעתי: "+alts[0]+". "+(P.sc.strict?"המשפט שלמדנו: ״תפסיקו בבקשה״. נסה שוב.":"ייתכן שהמערכת לא הבינה. אפשר שוב, או ללחוץ ״אמרתי״."); }
 }
 
 /* ---------- reward: the sentence card is the reward; repetition upgrades it ---------- */
