@@ -391,14 +391,14 @@ function home(){
   bindTop(); bindMark(home);
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(b){ b.onclick=function(){
     sTap(); var id=+b.dataset.id;
-    if(manual){ var c=Math.min(3,G.done[id]||0), n=c>=3?0:c+1; G.done[id]=n; logPush({id:id,m:1,n:n}); home(); return }
+    if(manual){ var c=Math.min(3,G.done[id]||0), n=c>=3?0:c+1; G.done[id]=n; G.xp=Math.max(0,G.xp+(n===0?-16:n===1?10:3)); logPush({id:id,m:1,n:n}); home(); return }
     play([id],false) } });
   $("bDet").onclick=function(){ sTap(); detHome() };
   $("bChal").onclick=function(){ sTap(); play(randIds(),true) };
   $("bMirror").onclick=function(){ sTap(); mirror() };
 }
 function manualBar(){
-  return manual?'<div class="mbar"><span>✏️ מצב סימון ידני: לחיצה על מצב מוסיפה כוכב (אחרי 3 — מתאפס). בשלב הבלש: לחיצה על תיק מסמנת/מבטלת.</span><button class="tbtn" id="bMarkOff">סיום סימון</button></div>':'';
+  return manual?'<div class="mbar"><span>✏️ מצב סימון ידני: לחיצה על מצב מוסיפה כוכב ונקודות, כמו משחק אמיתי (אחרי 3 — מתאפס). בשלב הבלש: לחיצה על תיק מסמנת/מבטלת.</span><button class="tbtn" id="bMarkOff">סיום סימון</button></div>':'';
 }
 function bindMark(back){
   document.body.classList.toggle("manual",manual);
@@ -420,7 +420,7 @@ function detHome(){
   bindTop(); bindMark(detHome); $("bHome").onclick=home;
   Array.prototype.forEach.call(document.querySelectorAll(".case"),function(b){ b.onclick=function(){
     sTap(); var id=+b.dataset.id;
-    if(manual){ if(G.det[id]) delete G.det[id]; else G.det[id]=1; logPush({d:id,m:1,n:G.det[id]?1:0}); detHome(); return }
+    if(manual){ if(G.det[id]){ delete G.det[id]; G.xp=Math.max(0,G.xp-8) } else { G.det[id]=1; G.xp+=8 } logPush({d:id,m:1,n:G.det[id]?1:0}); detHome(); return }
     detCase(id) } });
   $("bNext").onclick=function(){ sTap(); detCase(nxt?nxt.id:Math.floor(Math.random()*DET.length)) };
 }
